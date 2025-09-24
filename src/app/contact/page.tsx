@@ -3,45 +3,27 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ContactForm from "@/components/ContactForm";
 import { useState } from "react";
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: '',
-    newsletter: false
-  });
-
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFormSubmit = async (data: any) => {
+    setIsSubmitting(true);
     
-    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-      alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
-      return;
-    }
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: '',
-      newsletter: false
-    });
+    console.log('Form submitted:', data);
+    
+    setIsSubmitting(false);
+  };
+
+  const handleFormReset = () => {
+    console.log('Form reset');
   };
 
   const toggleFaq = (index: number) => {
@@ -162,95 +144,13 @@ export default function Contact() {
               <h2>Gửi tin nhắn cho chúng tôi</h2>
               <p>Điền thông tin vào form bên dưới và chúng tôi sẽ phản hồi trong thời gian sớm nhất.</p>
               
-              <form className="contact-form" onSubmit={handleSubmit}>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="name">Họ và tên *</label>
-                    <input 
-                      type="text" 
-                      id="name" 
-                      name="name" 
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required 
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="email">Email *</label>
-                    <input 
-                      type="email" 
-                      id="email" 
-                      name="email" 
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required 
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="phone">Số điện thoại</label>
-                    <input 
-                      type="tel" 
-                      id="phone" 
-                      name="phone" 
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="subject">Chủ đề *</label>
-                    <select 
-                      id="subject" 
-                      name="subject" 
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="">Chọn chủ đề</option>
-                      <option value="general">Tư vấn chung</option>
-                      <option value="product">Hỏi về sản phẩm</option>
-                      <option value="order">Hỏi về đơn hàng</option>
-                      <option value="warranty">Bảo hành</option>
-                      <option value="complaint">Khiếu nại</option>
-                      <option value="other">Khác</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="message">Nội dung tin nhắn *</label>
-                  <textarea 
-                    id="message" 
-                    name="message" 
-                    rows={5} 
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    required 
-                    placeholder="Hãy mô tả chi tiết vấn đề hoặc câu hỏi của bạn..."
-                  />
-                </div>
-
-                <div className="form-group checkbox-group">
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      id="newsletter" 
-                      name="newsletter" 
-                      checked={formData.newsletter}
-                      onChange={handleInputChange}
-                    />
-                    <span className="checkmark"></span>
-                    Tôi muốn nhận thông tin về sản phẩm mới và ưu đãi đặc biệt
-                  </label>
-                </div>
-
-                <button type="submit" className="btn btn-primary btn-large">
-                  <i className="fas fa-paper-plane"></i>
-                  Gửi tin nhắn
-                </button>
-              </form>
+              <ContactForm
+                onSubmit={handleFormSubmit}
+                onReset={handleFormReset}
+                loading={isSubmitting}
+                showNewsletter={true}
+                requiredFields={['name', 'email', 'subject', 'message']}
+              />
             </div>
           </div>
         </div>

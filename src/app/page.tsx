@@ -4,14 +4,53 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ProductCard from "@/components/ProductCard";
+import FeatureCard, { FeatureDescription, FeatureList, FeatureButton } from "@/components/FeatureCard";
 import { useState } from "react";
 
 export default function Home() {
   const [cartCount, setCartCount] = useState(0);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (productId: number) => {
     setCartCount(cartCount + 1);
+    console.log(`Added product ${productId} to cart`);
   };
+
+  // Dữ liệu sản phẩm
+  const products = [
+    {
+      id: 1,
+      name: 'iPhone 15 Pro',
+      description: 'Chip A17 Pro mạnh mẽ, camera 48MP',
+      price: 29990000,
+      oldPrice: 32990000,
+      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      badge: 'Mới'
+    },
+    {
+      id: 2,
+      name: 'Samsung Galaxy S24',
+      description: 'AI tích hợp, màn hình Dynamic AMOLED 2X',
+      price: 19990000,
+      oldPrice: 22990000,
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      badge: 'Hot'
+    },
+    {
+      id: 3,
+      name: 'Xiaomi 14',
+      description: 'Snapdragon 8 Gen 3, camera Leica',
+      price: 15990000,
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
+    },
+    {
+      id: 4,
+      name: 'OPPO Find X7',
+      description: 'Camera Hasselblad, sạc nhanh 100W',
+      price: 12990000,
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
+    }
+  ];
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,36 +87,65 @@ export default function Home() {
       {/* Features Section */}
       <section className="features" id="features">
         <div className="container">
-          <h2 className="section-title">Tại sao chọn PhoneStore?</h2> 
+          <h2 className="section-title">Tại sao chọn PhoneStore?</h2>
           <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">
-                <i className="fas fa-shipping-fast"></i>
-              </div>
-              <h3>Giao hàng nhanh</h3>
-              <p>Giao hàng miễn phí trong 24h cho đơn hàng trên 2 triệu đồng</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <i className="fas fa-shield-alt"></i>
-              </div>
-              <h3>Bảo hành chính hãng</h3>
-              <p>Bảo hành 12-24 tháng tùy sản phẩm từ nhà sản xuất</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <i className="fas fa-headset"></i>
-              </div>
-              <h3>Hỗ trợ 24/7</h3>
-              <p>Đội ngũ tư vấn chuyên nghiệp sẵn sàng hỗ trợ mọi lúc</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <i className="fas fa-undo"></i>
-              </div>
-              <h3>Đổi trả dễ dàng</h3>
-              <p>Đổi trả trong 7 ngày nếu không hài lòng về sản phẩm</p>
-            </div>
+            <FeatureCard 
+              icon="fas fa-shipping-fast" 
+              title="Giao hàng nhanh"
+              onClick={() => console.log('Clicked on shipping feature')}
+            >
+              <FeatureDescription>
+                Giao hàng miễn phí trong 24h cho đơn hàng trên 2 triệu đồng
+              </FeatureDescription>
+              <FeatureList items={[
+                "Giao hàng miễn phí toàn quốc",
+                "Đóng gói cẩn thận, an toàn",
+                "Theo dõi đơn hàng real-time"
+              ]} />
+            </FeatureCard>
+
+            <FeatureCard 
+              icon="fas fa-shield-alt" 
+              title="Bảo hành chính hãng"
+              variant="highlighted"
+            >
+              <FeatureDescription>
+                Bảo hành 12-24 tháng tùy sản phẩm từ nhà sản xuất
+              </FeatureDescription>
+              <FeatureList items={[
+                "Bảo hành chính hãng",
+                "Hỗ trợ sửa chữa nhanh chóng",
+                "Thay thế linh kiện chính hãng"
+              ]} />
+            </FeatureCard>
+
+            <FeatureCard 
+              icon="fas fa-headset" 
+              title="Hỗ trợ 24/7"
+              variant="minimal"
+            >
+              <FeatureDescription>
+                Đội ngũ tư vấn chuyên nghiệp sẵn sàng hỗ trợ mọi lúc
+              </FeatureDescription>
+              <FeatureButton 
+                text="Liên hệ ngay" 
+                onClick={() => window.location.href = '/contact'}
+              />
+            </FeatureCard>
+
+            <FeatureCard 
+              icon="fas fa-undo" 
+              title="Đổi trả dễ dàng"
+            >
+              <FeatureDescription>
+                Đổi trả trong 7 ngày nếu không hài lòng về sản phẩm
+              </FeatureDescription>
+              <FeatureList items={[
+                "Đổi trả trong 7 ngày",
+                "Hoàn tiền 100%",
+                "Thủ tục đơn giản"
+              ]} />
+            </FeatureCard>
           </div>
         </div>
       </section>
@@ -87,85 +155,19 @@ export default function Home() {
         <div className="container">
           <h2 className="section-title">Sản phẩm nổi bật</h2>
           <div className="products-grid">
-            <div className="product-card">
-              <div className="product-image">
-                <Image 
-                  src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
-                  alt="iPhone 15 Pro" 
-                  width={280}
-                  height={250}
-                />
-                <div className="product-badge">Mới</div>
-              </div>
-              <div className="product-info">
-                <h3>iPhone 15 Pro</h3>
-                <p className="product-description">Chip A17 Pro mạnh mẽ, camera 48MP</p>
-                <div className="product-price">
-                  <span className="current-price">29.990.000đ</span>
-                  <span className="old-price">32.990.000đ</span>
-                </div>
-                <button className="btn btn-primary" onClick={handleAddToCart}>Thêm vào giỏ</button>
-              </div>
-            </div>
-
-            <div className="product-card">
-              <div className="product-image">
-          <Image
-                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
-                  alt="Samsung Galaxy S24" 
-                  width={280}
-                  height={250}
-                />
-                <div className="product-badge">Hot</div>
-              </div>
-              <div className="product-info">
-                <h3>Samsung Galaxy S24</h3>
-                <p className="product-description">AI tích hợp, màn hình Dynamic AMOLED 2X</p>
-                <div className="product-price">
-                  <span className="current-price">19.990.000đ</span>
-                  <span className="old-price">22.990.000đ</span>
-                </div>
-                <button className="btn btn-primary" onClick={handleAddToCart}>Thêm vào giỏ</button>
-              </div>
-            </div>
-
-            <div className="product-card">
-              <div className="product-image">
-          <Image
-                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
-                  alt="Xiaomi 14" 
-                  width={280}
-                  height={250}
-                />
-              </div>
-              <div className="product-info">
-                <h3>Xiaomi 14</h3>
-                <p className="product-description">Snapdragon 8 Gen 3, camera Leica</p>
-                <div className="product-price">
-                  <span className="current-price">15.990.000đ</span>
-                </div>
-                <button className="btn btn-primary" onClick={handleAddToCart}>Thêm vào giỏ</button>
-              </div>
-            </div>
-
-            <div className="product-card">
-              <div className="product-image">
-          <Image
-                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
-                  alt="OPPO Find X7" 
-                  width={280}
-                  height={250}
-                />
-              </div>
-              <div className="product-info">
-                <h3>OPPO Find X7</h3>
-                <p className="product-description">Camera Hasselblad, sạc nhanh 100W</p>
-                <div className="product-price">
-                  <span className="current-price">12.990.000đ</span>
-                </div>
-                <button className="btn btn-primary" onClick={handleAddToCart}>Thêm vào giỏ</button>
-              </div>
-            </div>
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                description={product.description}
+                price={product.price}
+                oldPrice={product.oldPrice}
+                image={product.image}
+                badge={product.badge}
+                onAddToCart={handleAddToCart}
+              />
+            ))}
           </div>
           <div className="text-center">
             <Link href="/products" className="btn btn-outline">Xem tất cả sản phẩm</Link>

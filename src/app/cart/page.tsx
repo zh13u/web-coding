@@ -4,9 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CartItem from "@/components/CartItem";
+import ProductCard from "@/components/ProductCard";
 import { useState } from "react";
 
-interface CartItem {
+interface CartItemData {
   id: number;
   name: string;
   price: number;
@@ -16,7 +18,7 @@ interface CartItem {
 }
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([
+  const [cartItems, setCartItems] = useState<CartItemData[]>([
     {
       id: 1,
       name: 'iPhone 15 Pro',
@@ -120,56 +122,17 @@ export default function Cart() {
               {cartItems.length > 0 ? (
                 <div className="cart-list">
                   {cartItems.map((item) => (
-                    <div key={item.id} className="cart-item">
-                      <div className="item-image">
-                        <Image 
-                          src={item.image} 
-                          alt={item.name} 
-                          width={100}
-                          height={100}
-                        />
-                      </div>
-                      <div className="item-info">
-                        <h3>{item.name}</h3>
-                        <p className="item-variant">{item.variant}</p>
-                        <div className="item-price">
-                          <span className="current-price">{formatPrice(item.price)}</span>
-                        </div>
-                      </div>
-                      <div className="item-quantity">
-                        <button 
-                          className="quantity-btn decrease" 
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        >
-                          -
-                        </button>
-                        <input 
-                          type="number" 
-                          value={item.quantity} 
-                          min="1" 
-                          max="10" 
-                          className="quantity-input"
-                          onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
-                        />
-                        <button 
-                          className="quantity-btn increase" 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        >
-                          +
-                        </button>
-                      </div>
-                      <div className="item-total">
-                        <span className="total-price">{formatPrice(item.price * item.quantity)}</span>
-                      </div>
-                      <div className="item-actions">
-                        <button 
-                          className="remove-btn" 
-                          onClick={() => removeItem(item.id)}
-                        >
-                          <i className="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </div>
+                    <CartItem
+                      key={item.id}
+                      id={item.id}
+                      name={item.name}
+                      price={item.price}
+                      quantity={item.quantity}
+                      variant={item.variant}
+                      image={item.image}
+                      onQuantityChange={updateQuantity}
+                      onRemove={removeItem}
+                    />
                   ))}
                 </div>
               ) : (
