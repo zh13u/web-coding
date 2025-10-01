@@ -38,6 +38,21 @@ export default function Header({ activePage = '' }: HeaderProps) {
                 </Link>
               </li>
               <li className="nav-item">
+                <Link href="/promotions" className={`nav-link ${activePage === 'promotions' ? 'active' : ''}`}>
+                  Khuyến mãi
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link href="/news" className={`nav-link ${activePage === 'news' ? 'active' : ''}`}>
+                  Tin tức
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link href="/about" className={`nav-link ${activePage === 'about' ? 'active' : ''}`}>
+                  Giới thiệu
+                </Link>
+              </li>
+              <li className="nav-item">
                 <Link href="/contact" className={`nav-link ${activePage === 'contact' ? 'active' : ''}`}>
                   Liên hệ
                 </Link>
