@@ -1,7 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import AuthModal from './AuthModal';
+import ToastContainer from './Toast';
+import DarkModeToggle from './DarkModeToggle';
+import SearchSuggestions from './SearchSuggestions';
+import ProductComparison from './ProductComparison';
+import { AlertType } from '@/types';
 
 interface HeaderProps {
   activePage?: string;
@@ -9,9 +16,47 @@ interface HeaderProps {
 
 export default function Header({ activePage = '' }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
+  const [currentUser, setCurrentUser] = useLocalStorage<any>('currentUser', null);
+  const [toasts, setToasts] = useState<Array<{
+    id: string;
+    type: AlertType;
+    message: string;
+    duration?: number;
+  }>>([]);
+
+  const [cartItems] = useLocalStorage<any[]>('cart', []);
+  const [wishlistItems] = useLocalStorage<any[]>('wishlist', []);
+  const [comparisonItems] = useLocalStorage<any[]>('comparison', []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const showToast = (type: AlertType, message: string) => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, type, message }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  const handleLogin = (user: { name: string; email: string }) => {
+    setCurrentUser(user);
+    showToast('success', `Chào mừng ${user.name}!`);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('currentUser');
+    showToast('info', 'Đã đăng xuất thành công!');
+  };
+
+  const handleSearch = (query: string) => {
+    // Implement search logic
+    showToast('info', `Tìm kiếm: ${query}`);
   };
 
   return (
@@ -61,18 +106,65 @@ export default function Header({ activePage = '' }: HeaderProps) {
           </div>
           
           <div className="nav-actions">
-            <div className="search-box">
-              <input type="text" placeholder="Tìm kiếm điện thoại..." />
-              <button className="search-btn">
-                <i className="fas fa-search"></i>
-              </button>
+            <div className="search-container">
+              <SearchSuggestions onSearch={handleSearch} />
             </div>
-            <div className="cart-icon">
-              <Link href="/cart">
-                <i className="fas fa-shopping-cart"></i>
-                <span className="cart-count">0</span>
-              </Link>
+            
+            <div className="action-buttons">
+              <DarkModeToggle />
+              
+              <div className="comparison-icon">
+                <button onClick={() => setShowComparison(true)} title="So sánh sản phẩm">
+                  <i className="fas fa-balance-scale"></i>
+                  {comparisonItems.length > 0 && (
+                    <span className="comparison-count">{comparisonItems.length}</span>
+                  )}
+                </button>
+              </div>
+              
+              <div className="wishlist-icon">
+                <Link href="/wishlist" title="Danh sách yêu thích">
+                  <i className="fas fa-heart"></i>
+                  {wishlistItems.length > 0 && (
+                    <span className="wishlist-count">{wishlistItems.length}</span>
+                  )}
+                </Link>
+              </div>
+              
+              <div className="cart-icon">
+                <Link href="/cart" title="Giỏ hàng">
+                  <i className="fas fa-shopping-cart"></i>
+                  {cartItems.length > 0 && (
+                    <span className="cart-count">{cartItems.reduce((total, item) => total + item.quantity, 0)}</span>
+                  )}
+                </Link>
+              </div>
+              
+              <div className="user-menu">
+                {currentUser ? (
+                  <div className="user-dropdown">
+                    <button className="user-btn">
+                      <i className="fas fa-user"></i>
+                      <span>{currentUser.name}</span>
+                    </button>
+                    <div className="dropdown-menu">
+                      <Link href="/profile">Tài khoản</Link>
+                      <Link href="/orders">Đơn hàng</Link>
+                      <button onClick={handleLogout}>Đăng xuất</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button 
+                    className="login-btn"
+                    onClick={() => setShowAuthModal(true)}
+                  >
+                    <i className="fas fa-user"></i>
+                    Đăng nhập
+                  </button>
+                )}
+              </div>
             </div>
+            
             <div className={`hamburger ${isMenuOpen ? 'active' : ''}`} id="hamburger" onClick={toggleMenu}>
               <span></span>
               <span></span>
@@ -81,6 +173,21 @@ export default function Header({ activePage = '' }: HeaderProps) {
           </div>
         </div>
       </nav>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onLogin={handleLogin}
+      />
+
+      {/* Product Comparison Modal */}
+      {showComparison && (
+        <ProductComparison onClose={() => setShowComparison(false)} />
+      )}
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </header>
   );
 }

@@ -1,15 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Product } from "@/types";
+import { formatPrice } from "@/utils";
 
-// Interface cho props của ProductCard
-interface ProductCardProps {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  oldPrice?: number;
-  image: string;
-  badge?: string;
+// Interface cho props của ProductCard - sử dụng type từ types/index.ts
+interface ProductCardProps extends Omit<Product, 'brand' | 'category' | 'inStock'> {
   onAddToCart?: (productId: number) => void;
   className?: string;
 }
@@ -26,9 +21,7 @@ export default function ProductCard({
   onAddToCart,
   className = ""
 }: ProductCardProps) {
-  const formatPrice = (price: number) => {
-    return price.toLocaleString('vi-VN') + 'đ';
-  };
+  // Sử dụng utility function từ utils/index.ts
 
   const handleAddToCart = () => {
     if (onAddToCart) {
