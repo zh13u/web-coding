@@ -9,10 +9,10 @@ export default function Footer() {
             <h3>PhoneStore</h3>
             <p>Cửa hàng điện thoại uy tín với hơn 10 năm kinh nghiệm</p>
             <div className="social-links">
-              <a href="#"><i className="fab fa-facebook"></i></a>
-              <a href="#"><i className="fab fa-instagram"></i></a>
-              <a href="#"><i className="fab fa-youtube"></i></a>
-              <a href="#"><i className="fab fa-tiktok"></i></a>
+              <a href="#" aria-label="Facebook"><i className="fab fa-facebook"></i></a>
+              <a href="#" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
+              <a href="#" aria-label="YouTube"><i className="fab fa-youtube"></i></a>
+              <a href="#" aria-label="TikTok"><i className="fab fa-tiktok"></i></a>
             </div>
           </div>
           <div className="footer-section">
@@ -43,9 +43,10 @@ export default function Footer() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2024 PhoneStore. Tất cả quyền được bảo lưu.</p>
+          <p>&copy; 2025 PhoneStore. Tất cả quyền được bảo lưu.</p>
         </div>
       </div>
     </footer>
   );
 }
+

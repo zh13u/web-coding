@@ -41,7 +41,7 @@ export default function ContactForm({
     ...initialData
   });
 
-  const [errors, setErrors] = useState<Partial<ContactFormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof ContactFormData, string>>>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -60,7 +60,7 @@ export default function ContactForm({
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<ContactFormData> = {};
+    const newErrors: Partial<Record<keyof ContactFormData, string>> = {};
 
     requiredFields.forEach(field => {
       if (!formData[field] || (typeof formData[field] === 'string' && !formData[field].trim())) {

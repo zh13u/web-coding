@@ -5,8 +5,8 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartItem from "@/components/CartItem";
-import ProductCard from "@/components/ProductCard";
 import { useState } from "react";
+import { formatCurrency } from "@/utils";
 
 interface CartItemData {
   id: number;
@@ -25,7 +25,7 @@ export default function Cart() {
       price: 29990000,
       quantity: 1,
       variant: 'Màu: Titanium Natural | Dung lượng: 128GB',
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
+      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=500&q=80'
     },
     {
       id: 2,
@@ -33,7 +33,7 @@ export default function Cart() {
       price: 19990000,
       quantity: 2,
       variant: 'Màu: Titanium Black | Dung lượng: 256GB',
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80'
     },
     {
       id: 3,
@@ -41,21 +41,15 @@ export default function Cart() {
       price: 15990000,
       quantity: 1,
       variant: 'Màu: Black | Dung lượng: 128GB',
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80'
     }
   ]);
 
   const [couponCode, setCouponCode] = useState('');
 
   const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    if (newQuantity > 10) return;
-    
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
+    if (newQuantity < 1 || newQuantity > 10) return;
+    setCartItems(items => items.map(item => item.id === id ? { ...item, quantity: newQuantity } : item));
   };
 
   const removeItem = (id: number) => {
@@ -83,23 +77,17 @@ export default function Cart() {
       alert('Giỏ hàng của bạn đang trống!');
       return;
     }
-    
-    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) - 2000000;
-    alert(`Chuyển đến trang thanh toán với tổng đơn hàng: ${total.toLocaleString('vi-VN')}đ`);
-  };
-
-  const formatPrice = (price: number) => {
-    return price.toLocaleString('vi-VN') + 'đ';
+    window.location.href = '/checkout';
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const discount = 2000000;
-  const total = subtotal - discount;
+  const total = Math.max(0, subtotal - discount);
 
   return (
     <>
       <Header activePage="cart" />
-      
+
       {/* Page Header */}
       <section className="page-header">
         <div className="container">
@@ -115,7 +103,7 @@ export default function Cart() {
             {/* Cart Items */}
             <div className="cart-items">
               <div className="cart-header">
-                <h2>Sản phẩm trong giỏ hàng</h2>
+                <h2>Sản phẩm trong giỏ</h2>
                 <button className="btn btn-outline" onClick={clearCart}>Xóa tất cả</button>
               </div>
 
@@ -151,33 +139,33 @@ export default function Cart() {
             <div className="cart-summary">
               <div className="summary-card">
                 <h3>Tóm tắt đơn hàng</h3>
-                
+
                 <div className="summary-row">
                   <span>Tạm tính:</span>
-                  <span>{formatPrice(subtotal)}</span>
+                  <span>{formatCurrency(subtotal)}</span>
                 </div>
-                
+
                 <div className="summary-row">
                   <span>Phí vận chuyển:</span>
                   <span>Miễn phí</span>
                 </div>
-                
+
                 <div className="summary-row">
                   <span>Giảm giá:</span>
-                  <span className="discount">-{formatPrice(discount)}</span>
+                  <span className="discount">-{formatCurrency(discount)}</span>
                 </div>
-                
+
                 <div className="summary-row total">
                   <span>Tổng cộng:</span>
-                  <span>{formatPrice(total)}</span>
+                  <span>{formatCurrency(total)}</span>
                 </div>
 
                 <div className="coupon-section">
                   <h4>Mã giảm giá</h4>
                   <div className="coupon-input">
-                    <input 
-                      type="text" 
-                      placeholder="Nhập mã giảm giá" 
+                    <input
+                      type="text"
+                      placeholder="Nhập mã giảm giá"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
                     />
@@ -226,9 +214,9 @@ export default function Cart() {
           <div className="products-grid">
             <div className="product-card">
               <div className="product-image">
-                <Image 
-                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
-                  alt="OPPO Find X7" 
+                <Image
+                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80"
+                  alt="OPPO Find X7"
                   width={280}
                   height={250}
                 />
@@ -237,66 +225,28 @@ export default function Cart() {
                 <h3>OPPO Find X7</h3>
                 <p className="product-description">Camera Hasselblad, sạc nhanh 100W</p>
                 <div className="product-price">
-                  <span className="current-price">12.990.000đ</span>
+                  <span className="current-price">{formatCurrency(12990000)}</span>
                 </div>
-                <button className="btn btn-primary">Thêm vào giỏ</button>
+                <button className="btn btn-primary">Thêm vào giỏ hàng</button>
               </div>
             </div>
 
             <div className="product-card">
               <div className="product-image">
-                <Image 
-                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
-                  alt="Vivo X100" 
+                <Image
+                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80"
+                  alt="Vivo X100"
                   width={280}
                   height={250}
                 />
               </div>
               <div className="product-info">
                 <h3>Vivo X100</h3>
-                <p className="product-description">MediaTek Dimensity 9300, camera ZEISS</p>
+                <p className="product-description">Camera ZEISS, Dimensity 9300</p>
                 <div className="product-price">
-                  <span className="current-price">11.990.000đ</span>
+                  <span className="current-price">{formatCurrency(11990000)}</span>
                 </div>
-                <button className="btn btn-primary">Thêm vào giỏ</button>
-              </div>
-            </div>
-
-            <div className="product-card">
-              <div className="product-image">
-                <Image 
-                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
-                  alt="Samsung Galaxy A55" 
-                  width={280}
-                  height={250}
-                />
-              </div>
-              <div className="product-info">
-                <h3>Samsung Galaxy A55</h3>
-                <p className="product-description">Exynos 1480, camera 50MP</p>
-                <div className="product-price">
-                  <span className="current-price">17.990.000đ</span>
-                </div>
-                <button className="btn btn-primary">Thêm vào giỏ</button>
-              </div>
-            </div>
-
-            <div className="product-card">
-              <div className="product-image">
-                <Image 
-                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
-                  alt="Xiaomi Redmi Note 13" 
-                  width={280}
-                  height={250}
-                />
-              </div>
-              <div className="product-info">
-                <h3>Xiaomi Redmi Note 13</h3>
-                <p className="product-description">Snapdragon 685, camera 108MP</p>
-                <div className="product-price">
-                  <span className="current-price">8.990.000đ</span>
-                </div>
-                <button className="btn btn-primary">Thêm vào giỏ</button>
+                <button className="btn btn-primary">Thêm vào giỏ hàng</button>
               </div>
             </div>
           </div>
@@ -307,3 +257,4 @@ export default function Cart() {
     </>
   );
 }
+

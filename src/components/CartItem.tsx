@@ -1,6 +1,6 @@
 import Image from "next/image";
+import { formatCurrency } from "@/utils";
 
-// Interface cho props của CartItem
 interface CartItemProps {
   id: number;
   name: string;
@@ -15,7 +15,6 @@ interface CartItemProps {
   disabled?: boolean;
 }
 
-// Component CartItem với props và callbacks
 export default function CartItem({
   id,
   name,
@@ -27,11 +26,9 @@ export default function CartItem({
   onRemove,
   onUpdatePrice,
   className = "",
-  disabled = false
+  disabled = false,
 }: CartItemProps) {
-  const formatPrice = (price: number) => {
-    return price.toLocaleString('vi-VN') + 'đ';
-  };
+  const formatPrice = (value: number) => formatCurrency(value);
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= 10) {
@@ -54,14 +51,9 @@ export default function CartItem({
   return (
     <div className={`cart-item ${className} ${disabled ? 'disabled' : ''}`}>
       <div className="item-image">
-        <Image 
-          src={image} 
-          alt={name} 
-          width={100}
-          height={100}
-        />
+        <Image src={image} alt={name} width={100} height={100} />
       </div>
-      
+
       <div className="item-info">
         <h3>{name}</h3>
         <p className="item-variant">{variant}</p>
@@ -69,25 +61,25 @@ export default function CartItem({
           <span className="current-price">{formatPrice(price)}</span>
         </div>
       </div>
-      
+
       <div className="item-quantity">
-        <button 
+        <button
           className="quantity-btn decrease"
           onClick={() => handleQuantityChange(quantity - 1)}
           disabled={disabled || quantity <= 1}
         >
           -
         </button>
-        <input 
-          type="number" 
-          value={quantity} 
-          min="1" 
-          max="10" 
+        <input
+          type="number"
+          value={quantity}
+          min={1}
+          max={10}
           className="quantity-input"
           onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
           disabled={disabled}
         />
-        <button 
+        <button
           className="quantity-btn increase"
           onClick={() => handleQuantityChange(quantity + 1)}
           disabled={disabled || quantity >= 10}
@@ -95,13 +87,13 @@ export default function CartItem({
           +
         </button>
       </div>
-      
+
       <div className="item-total">
         <span className="total-price">{formatPrice(totalPrice)}</span>
       </div>
-      
+
       <div className="item-actions">
-        <button 
+        <button
           className="remove-btn"
           onClick={handleRemove}
           disabled={disabled}
@@ -113,3 +105,4 @@ export default function CartItem({
     </div>
   );
 }
+

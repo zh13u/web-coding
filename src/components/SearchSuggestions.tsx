@@ -10,7 +10,7 @@ interface SearchSuggestionsProps {
 
 export default function SearchSuggestions({ 
   onSearch, 
-  placeholder = "Tìm kiếm điện thoại..." 
+  placeholder = 'Tìm kiếm điện thoại...'
 }: SearchSuggestionsProps) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -33,7 +33,7 @@ export default function SearchSuggestions({
     'Điện thoại chơi game',
     'Điện thoại chụp ảnh',
     'Điện thoại giá rẻ',
-    'Điện thoại cao cấp'
+    'Điện thoại cao cấp',
   ];
 
   // Debounced search function
@@ -42,7 +42,7 @@ export default function SearchSuggestions({
       const filtered = allSuggestions.filter(suggestion =>
         suggestion.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setSuggestions(filtered.slice(0, 6)); // Limit to 6 suggestions
+      setSuggestions(filtered.slice(0, 6));
     } else {
       setSuggestions([]);
     }
@@ -50,6 +50,7 @@ export default function SearchSuggestions({
 
   useEffect(() => {
     debouncedSearch(query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,19 +73,16 @@ export default function SearchSuggestions({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setSelectedIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        );
+        setSelectedIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
+        setSelectedIndex(prev => (prev > 0 ? prev - 1 : -1));
         break;
       case 'Enter':
         e.preventDefault();
-        if (selectedIndex >= 0) {
-          handleSuggestionClick(suggestions[selectedIndex]);
-        } else {
+        if (selectedIndex >= 0) handleSuggestionClick(suggestions[selectedIndex]);
+        else {
           onSearch(query);
           setShowSuggestions(false);
         }
@@ -103,12 +101,9 @@ export default function SearchSuggestions({
     setShowSuggestions(false);
   };
 
-  const handleFocus = () => {
-    setShowSuggestions(true);
-  };
+  const handleFocus = () => setShowSuggestions(true);
 
-  const handleBlur = (e: React.FocusEvent) => {
-    // Delay hiding suggestions to allow clicking on them
+  const handleBlur = () => {
     setTimeout(() => {
       if (!suggestionsRef.current?.contains(document.activeElement)) {
         setShowSuggestions(false);
@@ -133,7 +128,7 @@ export default function SearchSuggestions({
             className="search-input"
             autoComplete="off"
           />
-          <button type="submit" className="search-btn">
+          <button type="submit" className="search-btn" aria-label="Tìm kiếm">
             <i className="fas fa-search"></i>
           </button>
         </div>
@@ -166,3 +161,4 @@ export default function SearchSuggestions({
     </div>
   );
 }
+

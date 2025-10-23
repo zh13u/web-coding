@@ -24,9 +24,9 @@ export default function FeatureCard({
   const getVariantClass = () => {
     switch (variant) {
       case 'highlighted':
-        return 'feature-card-highlighted';
+        return 'feature-card feature-card-highlighted';
       case 'minimal':
-        return 'feature-card-minimal';
+        return 'feature-card feature-card-minimal';
       default:
         return 'feature-card';
     }

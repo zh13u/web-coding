@@ -20,7 +20,7 @@ export const calculateTotal = (items: Array<{ price: number; quantity: number }>
 
 // Lọc sản phẩm theo filter
 export const filterProducts = (products: Product[], filter: ProductFilter): Product[] => {
-  let filtered = products.filter(product => {
+  const filtered = products.filter(product => {
     // Lọc theo từ khóa tìm kiếm
     const matchesSearch = product.name.toLowerCase().includes(filter.searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(filter.searchTerm.toLowerCase());
@@ -102,7 +102,7 @@ export const generateId = (): number => {
 };
 
 // Debounce function (trì hoãn thực thi)
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {
@@ -115,7 +115,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 };
 
 // Throttle function (giới hạn tần suất thực thi)
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {
@@ -129,3 +129,17 @@ export const throttle = <T extends (...args: any[]) => any>(
     }
   };
 };
+
+// Định dạng tiền tệ VND (ổn định ký tự ₫ và locale)
+export const formatCurrency = (price: number): string => {
+  try {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0,
+    }).format(price);
+  } catch {
+    return price.toLocaleString('vi-VN') + ' ₫';
+  }
+};
+

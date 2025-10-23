@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useState, useEffect } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { formatCurrency } from '@/utils';
 
 export default function AdminDashboard() {
   const [currentUser] = useLocalStorage<any>('currentUser', null);
@@ -44,6 +45,9 @@ export default function AdminDashboard() {
 
   const recentUsers = usersData.slice(-5).reverse();
   const recentReviews = reviewsData.slice(-5).reverse();
+
+  // formatter an toàn cho VND
+  const formatPriceSafe = (price: number) => formatCurrency(price);
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('vi-VN') + 'đ';
@@ -122,7 +126,7 @@ export default function AdminDashboard() {
               </div>
               <div className="stat-info">
                 <h3>Doanh thu</h3>
-                <p className="stat-number">{formatPrice(stats.totalRevenue)}</p>
+                <p className="stat-number">{formatPriceSafe(stats.totalRevenue)}</p>
                 <span className="stat-change positive">+15% so với tháng trước</span>
               </div>
             </div>
@@ -248,22 +252,26 @@ export default function AdminDashboard() {
           <div className="quick-actions">
             <h3>Thao tác nhanh</h3>
             <div className="actions-grid">
-              <button className="action-btn">
-                <i className="fas fa-plus"></i>
-                Thêm sản phẩm mới
-              </button>
-              <button className="action-btn">
-                <i className="fas fa-edit"></i>
-                Chỉnh sửa sản phẩm
-              </button>
-              <button className="action-btn">
-                <i className="fas fa-chart-bar"></i>
-                Xem báo cáo chi tiết
-              </button>
-              <button className="action-btn">
-                <i className="fas fa-cog"></i>
-                Cài đặt hệ thống
-              </button>
+              <a href="/admin/products" className="action-btn">
+                <i className="fas fa-mobile-alt"></i>
+                Quản lý sản phẩm
+              </a>
+              <a href="/admin/categories" className="action-btn">
+                <i className="fas fa-th-large"></i>
+                Quản lý danh mục
+              </a>
+              <a href="/admin/orders" className="action-btn">
+                <i className="fas fa-shopping-cart"></i>
+                Quản lý đơn hàng
+              </a>
+              <a href="/admin/customers" className="action-btn">
+                <i className="fas fa-users"></i>
+                Quản lý khách hàng
+              </a>
+              <a href="/admin/accounts" className="action-btn">
+                <i className="fas fa-user-shield"></i>
+                Quản lý tài khoản admin
+              </a>
             </div>
           </div>
         </div>
@@ -273,3 +281,4 @@ export default function AdminDashboard() {
     </>
   );
 }
+

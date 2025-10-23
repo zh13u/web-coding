@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { formatCurrency } from "@/utils";
 import { useState, useEffect } from "react";
 
 interface Product {
@@ -18,7 +19,6 @@ interface Product {
 }
 
 export default function Products() {
-  const [cartCount, setCartCount] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,9 +33,9 @@ export default function Products() {
       description: 'Chip A17 Pro mạnh mẽ, camera 48MP',
       price: 29990000,
       oldPrice: 32990000,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=500&q=80',
       brand: 'iphone',
-      badge: 'Mới'
+      badge: 'Mới',
     },
     {
       id: 2,
@@ -43,58 +43,58 @@ export default function Products() {
       description: 'AI tích hợp, màn hình Dynamic AMOLED 2X',
       price: 19990000,
       oldPrice: 22990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
       brand: 'samsung',
-      badge: 'Hot'
+      badge: 'Hot',
     },
     {
       id: 3,
       name: 'Xiaomi 14',
       description: 'Snapdragon 8 Gen 3, camera Leica',
       price: 15990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      brand: 'xiaomi'
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
+      brand: 'xiaomi',
     },
     {
       id: 4,
       name: 'OPPO Find X7',
       description: 'Camera Hasselblad, sạc nhanh 100W',
       price: 12990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      brand: 'oppo'
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
+      brand: 'oppo',
     },
     {
       id: 5,
       name: 'iPhone 15',
       description: 'Chip A16 Bionic, camera 48MP',
       price: 24990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      brand: 'iphone'
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
+      brand: 'iphone',
     },
     {
       id: 6,
       name: 'Samsung Galaxy A55',
       description: 'Exynos 1480, camera 50MP',
       price: 17990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      brand: 'samsung'
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
+      brand: 'samsung',
     },
     {
       id: 7,
       name: 'Xiaomi Redmi Note 13',
       description: 'Snapdragon 685, camera 108MP',
       price: 8990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      brand: 'xiaomi'
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
+      brand: 'xiaomi',
     },
     {
       id: 8,
       name: 'Vivo X100',
       description: 'MediaTek Dimensity 9300, camera ZEISS',
       price: 11990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      brand: 'vivo'
-    }
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
+      brand: 'vivo',
+    },
   ];
 
   useEffect(() => {
@@ -103,15 +103,13 @@ export default function Products() {
   }, []);
 
   useEffect(() => {
-    let filtered = products.filter(product => {
+    const filtered = products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesBrand = !brandFilter || product.brand === brandFilter;
       const matchesPrice = !priceFilter || checkPriceRange(product.price, priceFilter);
-      
       return matchesSearch && matchesBrand && matchesPrice;
     });
 
-    // Sort products
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
@@ -135,10 +133,6 @@ export default function Products() {
     return price >= min && price <= max;
   };
 
-  const handleAddToCart = () => {
-    setCartCount(cartCount + 1);
-  };
-
   const clearFilters = () => {
     setSearchTerm('');
     setBrandFilter('');
@@ -146,14 +140,12 @@ export default function Products() {
     setSortBy('name');
   };
 
-  const formatPrice = (price: number) => {
-    return price.toLocaleString('vi-VN') + 'đ';
-  };
+  const formatPriceSafe = (price: number) => formatCurrency(price);
 
   return (
     <>
       <Header activePage="products" />
-      
+
       {/* Page Header */}
       <section className="page-header">
         <div className="container">
@@ -168,11 +160,7 @@ export default function Products() {
           <div className="filter-container">
             <div className="filter-group">
               <label htmlFor="brand-filter">Thương hiệu:</label>
-              <select 
-                id="brand-filter" 
-                value={brandFilter} 
-                onChange={(e) => setBrandFilter(e.target.value)}
-              >
+              <select id="brand-filter" value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)}>
                 <option value="">Tất cả</option>
                 <option value="iphone">iPhone</option>
                 <option value="samsung">Samsung</option>
@@ -183,11 +171,7 @@ export default function Products() {
             </div>
             <div className="filter-group">
               <label htmlFor="price-filter">Giá:</label>
-              <select 
-                id="price-filter" 
-                value={priceFilter} 
-                onChange={(e) => setPriceFilter(e.target.value)}
-              >
+              <select id="price-filter" value={priceFilter} onChange={(e) => setPriceFilter(e.target.value)}>
                 <option value="">Tất cả</option>
                 <option value="0-5000000">Dưới 5 triệu</option>
                 <option value="5000000-10000000">5-10 triệu</option>
@@ -197,11 +181,7 @@ export default function Products() {
             </div>
             <div className="filter-group">
               <label htmlFor="sort-filter">Sắp xếp:</label>
-              <select 
-                id="sort-filter" 
-                value={sortBy} 
-                onChange={(e) => setSortBy(e.target.value)}
-              >
+              <select id="sort-filter" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                 <option value="name">Tên A-Z</option>
                 <option value="price-low">Giá thấp đến cao</option>
                 <option value="price-high">Giá cao đến thấp</option>
@@ -221,28 +201,17 @@ export default function Products() {
               filteredProducts.map((product) => (
                 <div key={product.id} className="product-card">
                   <div className="product-image">
-                    <Image 
-                      src={product.image} 
-                      alt={product.name} 
-                      width={280}
-                      height={250}
-                    />
-                    {product.badge && (
-                      <div className="product-badge">{product.badge}</div>
-                    )}
+                    <Image src={product.image} alt={product.name} width={280} height={250} />
+                    {product.badge && <div className="product-badge">{product.badge}</div>}
                   </div>
                   <div className="product-info">
                     <h3>{product.name}</h3>
                     <p className="product-description">{product.description}</p>
                     <div className="product-price">
-                      <span className="current-price">{formatPrice(product.price)}</span>
-                      {product.oldPrice && (
-                        <span className="old-price">{formatPrice(product.oldPrice)}</span>
-                      )}
+                      <span className="current-price">{formatPriceSafe(product.price)}</span>
+                      {product.oldPrice && <span className="old-price">{formatPriceSafe(product.oldPrice)}</span>}
                     </div>
-                    <button className="btn btn-primary" onClick={handleAddToCart}>
-                      Thêm vào giỏ
-                    </button>
+                    <button className="btn btn-primary">Thêm vào giỏ</button>
                   </div>
                 </div>
               ))
@@ -253,15 +222,6 @@ export default function Products() {
               </div>
             )}
           </div>
-
-          {/* Pagination */}
-          <div className="pagination">
-            <button className="btn btn-outline" disabled>Trước</button>
-            <button className="btn btn-primary">1</button>
-            <button className="btn btn-outline">2</button>
-            <button className="btn btn-outline">3</button>
-            <button className="btn btn-outline">Sau</button>
-          </div>
         </div>
       </section>
 
@@ -269,3 +229,4 @@ export default function Products() {
     </>
   );
 }
+

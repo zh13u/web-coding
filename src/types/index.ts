@@ -71,6 +71,27 @@ export interface User {
   address?: string;
 }
 
+export type AdminRole = 'super_admin' | 'product_manager' | 'order_manager' | 'customer_manager';
+
+export interface AdminAccount {
+  id: number;
+  name: string;
+  email: string;
+  role: AdminRole;
+  isActive: boolean;
+  createdAt: string;
+  lastLogin: string | null;
+}
+
+export interface CustomerSummary {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  joinedAt: string;
+  ordersCount?: number;
+}
+
 // Kiểu dữ liệu cho đơn hàng
 export interface Order {
   id: number;
@@ -123,3 +144,4 @@ export type AlertType = 'success' | 'error' | 'warning' | 'info';
 // Kiểu dữ liệu cho badge
 export type BadgeType = 'default' | 'success' | 'warning' | 'error' | 'info';
 export type BadgeSize = 'small' | 'medium' | 'large';
+
