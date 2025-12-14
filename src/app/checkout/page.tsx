@@ -30,6 +30,9 @@ export default function Checkout() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [couponMessage, setCouponMessage] = useState('');
 
   useEffect(() => {
     if (cartItems.length === 0) {
@@ -69,6 +72,7 @@ export default function Checkout() {
       items: cartItems,
       customer: formData,
       total: calculateTotal(),
+      discount: discountAmount,
       status: 'pending',
       createdAt: new Date().toISOString()
     };
@@ -82,8 +86,46 @@ export default function Checkout() {
   };
 
   const calculateSubtotal = () => cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const calculateShipping = () => (calculateSubtotal() >= 2000000 ? 0 : 50000);
-  const calculateTotal = () => calculateSubtotal() + calculateShipping();
+  const calculateShipping = (subtotal: number) => (subtotal >= 2000000 ? 0 : 50000);
+  const calculateDiscount = (subtotal: number) => Math.min(discountAmount, subtotal);
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal();
+    const shipping = calculateShipping(subtotal);
+    const discount = calculateDiscount(subtotal);
+    return subtotal + shipping - discount;
+  };
+
+  const applyCoupon = () => {
+    const code = couponCode.trim().toUpperCase();
+    const subtotal = calculateSubtotal();
+    if (!code) {
+      setCouponMessage('Vui lòng nhập mã giảm giá');
+      setDiscountAmount(0);
+      return;
+    }
+
+    if (code === 'PHONE10') {
+      const discount = Math.floor(subtotal * 0.1);
+      setDiscountAmount(discount);
+      setCouponMessage('Đã áp dụng mã PHONE10 (giảm 10%)');
+      return;
+    }
+
+    if (code === 'SALE50K') {
+      const discount = Math.min(50000, subtotal);
+      setDiscountAmount(discount);
+      setCouponMessage('Đã áp dụng mã SALE50K (giảm 50.000đ)');
+      return;
+    }
+
+    setDiscountAmount(0);
+    setCouponMessage('Mã giảm giá không hợp lệ');
+  };
+
+  const subtotal = calculateSubtotal();
+  const shippingFee = calculateShipping(subtotal);
+  const discount = calculateDiscount(subtotal);
+  const total = subtotal + shippingFee - discount;
 
   const formatPrice = (price: number) => formatCurrency(price);
 
@@ -214,9 +256,44 @@ export default function Checkout() {
             {/* Order Summary */}
             <div className="order-summary">
               <h2>Tóm tắt đơn hàng</h2>
-              <div className="summary-row"><span>Tạm tính:</span><span>{formatPrice(calculateSubtotal())}</span></div>
-              <div className="summary-row"><span>Phí vận chuyển:</span><span>{calculateShipping() === 0 ? 'Miễn phí' : formatPrice(calculateShipping())}</span></div>
-              <div className="summary-row total"><span>Tổng cộng:</span><span>{formatPrice(calculateTotal())}</span></div>
+              <div className="summary-row">
+                <span>Tạm tính:</span>
+                <span>{formatPrice(subtotal)}</span>
+              </div>
+              <div className="summary-row">
+                <span>Phí vận chuyển:</span>
+                <span>{shippingFee === 0 ? 'Miễn phí' : formatPrice(shippingFee)}</span>
+              </div>
+              <div className="summary-row">
+                <span>Giảm giá:</span>
+                <span>-{discount > 0 ? formatPrice(discount) : formatPrice(0)}</span>
+              </div>
+              <div className="summary-row total">
+                <span>Tổng cộng:</span>
+                <span>{formatPrice(total)}</span>
+              </div>
+
+              <div className="form-group" style={{ marginTop: '1rem' }}>
+                <label htmlFor="coupon">Mã giảm giá (ví dụ: PHONE10)</label>
+                <div className="form-row" style={{ gap: '0.5rem' }}>
+                  <input
+                    id="coupon"
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    placeholder="Nhập mã giảm giá"
+                    style={{ flex: 1 }}
+                  />
+                  <button type="button" className="btn btn-outline" onClick={applyCoupon}>
+                    Áp dụng
+                  </button>
+                </div>
+                {couponMessage && (
+                  <p style={{ marginTop: '0.5rem', color: discount > 0 ? '#16a34a' : '#dc2626' }}>
+                    {couponMessage}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -225,4 +302,3 @@ export default function Checkout() {
     </>
   );
 }
-

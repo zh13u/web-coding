@@ -1,203 +1,260 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import AuthModal from './AuthModal';
 import ChangePasswordModal from './ChangePasswordModal';
-import { ToastContainer } from './Toast';
 import DarkModeToggle from './DarkModeToggle';
 import SearchSuggestions from './SearchSuggestions';
-import ProductComparison from './ProductComparison';
-import { AlertType } from '@/types';
 
 interface HeaderProps {
   activePage?: string;
 }
 
+interface CurrentUser {
+  name: string;
+  email: string;
+}
+
 export default function Header({ activePage = '' }: HeaderProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showComparison, setShowComparison] = useState(false);
-  const [currentUser, setCurrentUser] = useLocalStorage<{ name: string; email: string } | null>('currentUser', null);
-  const [toasts, setToasts] = useState<Array<{
-    id: string;
-    type: AlertType;
-    message: string;
-    duration?: number;
-  }>>([]);
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  const [cartItems] = useLocalStorage<Array<{ id: number; name: string; price: number; quantity: number; variant: string; image: string }>>('cart', []);
-  const [wishlistItems] = useLocalStorage<Array<{ id: number }>>('wishlist', []);
-  const [comparisonItems] = useLocalStorage<Array<{ id: number }>>('comparison', []);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem('currentUser');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.name && parsed.email) {
+          setCurrentUser({ name: parsed.name, email: parsed.email });
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
-  const toggleMenu = () => setIsMenuOpen(v => !v);
+  useEffect(() => {
+    const updateCounts = () => {
+      try {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
 
-  const showToast = (type: AlertType, message: string) => {
-    const id = Date.now().toString();
-    setToasts(prev => [...prev, { id, type, message }]);
-  };
+        const totalCartItems = Array.isArray(cart)
+          ? cart.reduce((sum, item) => sum + (item.quantity || 0), 0)
+          : 0;
 
-  const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
+        setCartCount(totalCartItems);
+        setWishlistCount(Array.isArray(wishlist) ? wishlist.length : 0);
+      } catch {
+        setCartCount(0);
+        setWishlistCount(0);
+      }
+    };
 
-  const handleLogin = (user: { name: string; email: string }) => {
+    updateCounts();
+    window.addEventListener('storage', updateCounts);
+    return () => window.removeEventListener('storage', updateCounts);
+  }, []);
+
+  const handleLoginSuccess = (user: { name: string; email: string }) => {
     setCurrentUser(user);
-    showToast('success', `Chào mừng ${user.name}!`);
+    setIsAuthOpen(false);
   };
 
   const handleLogout = () => {
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('currentUser');
+      }
+    } catch {
+      // ignore
+    }
     setCurrentUser(null);
-    localStorage.removeItem('currentUser');
-    showToast('info', 'Đã đăng xuất thành công!');
+    setIsUserMenuOpen(false);
+    router.push('/');
   };
 
   const handleSearch = (query: string) => {
-    showToast('info', `Tìm kiếm: ${query}`);
+    const trimmed = query.trim();
+    if (!trimmed) {
+      router.push('/products');
+      return;
+    }
+    const params = new URLSearchParams({ q: trimmed });
+    router.push(`/products?${params.toString()}`);
+  };
+
+  const goToOrders = () => {
+    setIsUserMenuOpen(false);
+    router.push('/orders');
+  };
+
+  const goToAdmin = () => {
+    setIsUserMenuOpen(false);
+    router.push('/admin');
   };
 
   return (
-    <header className="header">
-      <nav className="navbar">
-        <div className="nav-container">
-          <div className="nav-logo">
-            <Link href="/">
-              <i className="fas fa-mobile-alt"></i>
-              <span>PhoneStore</span>
-            </Link>
-          </div>
+    <>
+      <header className="header">
+        <nav className="navbar">
+          <div className="nav-container">
+            <div className="nav-logo">
+              <Link href="/">
+                <i className="fas fa-mobile-alt" />
+                <span>PhoneStore</span>
+              </Link>
+            </div>
 
-          <div className={`nav-menu ${isMenuOpen ? 'active' : ''}`} id="nav-menu">
             <ul className="nav-list">
               <li className="nav-item">
-                <Link href="/" className={`nav-link ${activePage === 'home' ? 'active' : ''}`}>
+                <Link
+                  href="/"
+                  className={`nav-link ${activePage === 'home' ? 'active' : ''}`}
+                >
                   Trang chủ
                 </Link>
               </li>
               <li className="nav-item">
-                <Link href="/products" className={`nav-link ${activePage === 'products' ? 'active' : ''}`}>
+                <Link
+                  href="/products"
+                  className={`nav-link ${activePage === 'products' ? 'active' : ''}`}
+                >
                   Sản phẩm
                 </Link>
               </li>
               <li className="nav-item">
-                <Link href="/promotions" className={`nav-link ${activePage === 'promotions' ? 'active' : ''}`}>
+                <Link
+                  href="/promotions"
+                  className={`nav-link ${
+                    activePage === 'promotions' ? 'active' : ''
+                  }`}
+                >
                   Khuyến mãi
                 </Link>
               </li>
               <li className="nav-item">
-                <Link href="/news" className={`nav-link ${activePage === 'news' ? 'active' : ''}`}>
+                <Link
+                  href="/news"
+                  className={`nav-link ${activePage === 'news' ? 'active' : ''}`}
+                >
                   Tin tức
                 </Link>
               </li>
               <li className="nav-item">
-                <Link href="/about" className={`nav-link ${activePage === 'about' ? 'active' : ''}`}>
+                <Link
+                  href="/about"
+                  className={`nav-link ${activePage === 'about' ? 'active' : ''}`}
+                >
                   Giới thiệu
                 </Link>
               </li>
               <li className="nav-item">
-                <Link href="/contact" className={`nav-link ${activePage === 'contact' ? 'active' : ''}`}>
+                <Link
+                  href="/contact"
+                  className={`nav-link ${activePage === 'contact' ? 'active' : ''}`}
+                >
                   Liên hệ
                 </Link>
               </li>
             </ul>
-          </div>
 
-          <div className="nav-actions">
-            <div className="search-container">
-              <SearchSuggestions onSearch={handleSearch} />
-            </div>
+            <div className="nav-actions">
+              <div className="nav-search">
+                <SearchSuggestions onSearch={handleSearch} />
+              </div>
 
-            <div className="action-buttons">
               <DarkModeToggle />
 
-              <div className="comparison-icon">
-                <button onClick={() => setShowComparison(true)} title="So sánh sản phẩm">
-                  <i className="fas fa-balance-scale"></i>
-                  {comparisonItems.length > 0 && (
-                    <span className="comparison-count">{comparisonItems.length}</span>
-                  )}
-                </button>
-              </div>
-
-              <div className="wishlist-icon">
-                <Link href="/wishlist" title="Danh sách yêu thích">
-                  <i className="fas fa-heart"></i>
-                  {wishlistItems.length > 0 && (
-                    <span className="wishlist-count">{wishlistItems.length}</span>
-                  )}
-                </Link>
-              </div>
-
               <div className="cart-icon">
-                <Link href="/cart" title="Giỏ hàng">
-                  <i className="fas fa-shopping-cart"></i>
-                  {cartItems.length > 0 && (
-                    <span className="cart-count">{cartItems.reduce((total, item) => total + item.quantity, 0)}</span>
+                <Link href="/wishlist" title="Yêu thích" className="wishlist-icon">
+                  <i className="fas fa-heart" />
+                  {wishlistCount > 0 && (
+                    <span className="wishlist-count">{wishlistCount}</span>
+                  )}
+                </Link>
+                <Link href="/cart" title="Giỏ hàng" className="wishlist-icon">
+                  <i className="fas fa-shopping-cart" />
+                  {cartCount > 0 && (
+                    <span className="wishlist-count">{cartCount}</span>
                   )}
                 </Link>
               </div>
 
-              <div className="user-menu">
+              <div className="user-dropdown">
                 {currentUser ? (
-                  <div className="user-dropdown">
-                    <button className="user-btn">
-                      <i className="fas fa-user"></i>
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setIsUserMenuOpen((open) => !open)}
+                    >
+                      <i className="fas fa-user" />
                       <span>{currentUser.name}</span>
+                      <i className="fas fa-chevron-down" />
                     </button>
-                    <div className="dropdown-menu">
-                      <Link href="/profile">Tài khoản</Link>
-                      <Link href="/orders">Đơn hàng</Link>
-                      <button onClick={() => setShowChangePasswordModal(true)}>Đổi mật khẩu</button>
-                      <button onClick={handleLogout}>Đăng xuất</button>
-                    </div>
-                  </div>
+                    {isUserMenuOpen && (
+                      <div className="dropdown-menu">
+                        <button type="button" onClick={goToOrders}>
+                          <i className="fas fa-box" />
+                          Đơn hàng của tôi
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsChangePasswordOpen(true);
+                            setIsUserMenuOpen(false);
+                          }}
+                        >
+                          <i className="fas fa-key" />
+                          Đổi mật khẩu
+                        </button>
+                        <button type="button" onClick={goToAdmin}>
+                          <i className="fas fa-tools" />
+                          Trang quản trị
+                        </button>
+                        <button type="button" onClick={handleLogout}>
+                          <i className="fas fa-sign-out-alt" />
+                          Đăng xuất
+                        </button>
+                      </div>
+                    )}
+                  </>
                 ) : (
-                  <button 
-                    className="login-btn"
-                    onClick={() => setShowAuthModal(true)}
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={() => setIsAuthOpen(true)}
                   >
-                    <i className="fas fa-user"></i>
+                    <i className="fas fa-user" />
                     Đăng nhập
                   </button>
                 )}
               </div>
             </div>
-
-            <div className={`hamburger ${isMenuOpen ? 'active' : ''}`} id="hamburger" onClick={toggleMenu}>
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onLogin={handleLogin}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLogin={handleLoginSuccess}
       />
 
-      {/* Product Comparison Modal */}
-      {showComparison && (
-        <ProductComparison onClose={() => setShowComparison(false)} />
-      )}
-
-      {/* Change Password Modal */}
-      {showChangePasswordModal && (
-        <ChangePasswordModal 
-          onClose={() => setShowChangePasswordModal(false)}
-          onSuccess={() => {
-            setShowChangePasswordModal(false);
-            showToast('success', 'Đổi mật khẩu thành công!');
-          }}
+      {isChangePasswordOpen && (
+        <ChangePasswordModal
+          onClose={() => setIsChangePasswordOpen(false)}
+          onSuccess={() => setIsChangePasswordOpen(false)}
         />
       )}
-
-      {/* Toast Notifications */}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
-    </header>
+    </>
   );
 }
-

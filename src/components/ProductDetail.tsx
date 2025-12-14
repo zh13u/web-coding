@@ -1,5 +1,10 @@
+'use client';
+
 import Image from "next/image";
-import { useState } from "react";
+import { SyntheticEvent, useState } from "react";
+
+const FALLBACK_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 240' role='img' aria-label='Placeholder'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230ea5e9'/%3E%3Cstop offset='100%25' stop-color='%236366f1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='320' height='240' rx='18' fill='url(%23g)'/%3E%3Crect x='98' y='24' width='124' height='192' rx='16' fill='%23111' stroke='%23222' stroke-width='3'/%3E%3Crect x='112' y='52' width='96' height='136' rx='12' fill='%23182'/%3E%3Ccircle cx='160' cy='38' r='4' fill='%23cbd5e1'/%3E%3Crect x='136' y='40' width='48' height='5' rx='2.5' fill='%23cbd5e1'/%3E%3Ccircle cx='160' cy='206' r='5' fill='%23cbd5e1'/%3E%3Ctext x='160' y='192' fill='%23e2e8f0' font-family='Arial, sans-serif' font-size='14' text-anchor='middle'%3EPhoneStore%3C/text%3E%3C/svg%3E";
 
 // Interface cho props phức tạp của ProductDetail
 interface ProductVariant {
@@ -28,6 +33,7 @@ interface ProductDetailProps {
   specs: ProductSpecs;
   features: string[];
   onAddToCart: (productId: number, variant: ProductVariant, quantity: number) => void;
+  onBuyNow?: (productId: number, variant: ProductVariant, quantity: number) => void;
   onQuantityChange?: (quantity: number) => void;
   className?: string;
 }
@@ -51,6 +57,14 @@ export default function ProductDetail({
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(variants[0]);
   const [quantity, setQuantity] = useState(1);
 
+  const handleImageError = (event: SyntheticEvent<HTMLImageElement>) => {
+    const img = event.currentTarget;
+    if (img.src !== FALLBACK_IMAGE) {
+      img.src = FALLBACK_IMAGE;
+      img.srcset = FALLBACK_IMAGE;
+    }
+  };
+
   const formatPrice = (price: number) => {
     return price.toLocaleString('vi-VN') + 'đ';
   };
@@ -68,6 +82,14 @@ export default function ProductDetail({
     onAddToCart(id, selectedVariant, quantity);
   };
 
+  const handleBuyNow = () => {
+    if (onBuyNow) {
+      onBuyNow(id, selectedVariant, quantity);
+    } else {
+      onAddToCart(id, selectedVariant, quantity);
+    }
+  };
+
   const handleVariantChange = (variant: ProductVariant) => {
     setSelectedVariant(variant);
   };
@@ -82,6 +104,7 @@ export default function ProductDetail({
               alt={name} 
               width={500}
               height={500}
+              onError={handleImageError}
             />
             {badge && (
               <div className="product-badge">{badge}</div>
@@ -165,6 +188,9 @@ export default function ProductDetail({
           <button className="btn btn-primary btn-large" onClick={handleAddToCart}>
             <i className="fas fa-shopping-cart"></i>
             Thêm vào giỏ hàng
+          </button>
+          <button className="btn btn-outline btn-large" onClick={handleBuyNow}>
+            Mua ngay
           </button>
 
           <div className="product-features">

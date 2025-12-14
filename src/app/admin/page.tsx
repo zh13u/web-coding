@@ -8,10 +8,9 @@ import { formatCurrency } from '@/utils';
 
 export default function AdminDashboard() {
   const [currentUser] = useLocalStorage<any>('currentUser', null);
-  const [cartData] = useLocalStorage<any[]>('cart', []);
-  const [wishlistData] = useLocalStorage<any[]>('wishlist', []);
   const [reviewsData] = useLocalStorage<any[]>('reviews', []);
   const [usersData] = useLocalStorage<any[]>('users', []);
+  const [ordersData] = useLocalStorage<any[]>('orders', []);
 
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -22,26 +21,76 @@ export default function AdminDashboard() {
     totalReviews: 0
   });
 
+  const [revenueStats, setRevenueStats] = useState({
+    today: 0,
+    thisWeek: 0,
+    thisMonth: 0,
+  });
+
   useEffect(() => {
-    // Calculate stats from localStorage data
     const totalUsers = usersData.length;
     const totalReviews = reviewsData.length;
-    const averageRating = reviewsData.length > 0 
-      ? reviewsData.reduce((sum, review) => sum + review.rating, 0) / reviewsData.length 
-      : 0;
-    
-    // Mock revenue calculation
-    const totalRevenue = cartData.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const averageRating =
+      reviewsData.length > 0
+        ? reviewsData.reduce((sum, review) => sum + review.rating, 0) / reviewsData.length
+        : 0;
+
+    const orders = ordersData ?? [];
+    const totalOrders = orders.length;
+
+    let totalRevenue = 0;
+    let todayRevenue = 0;
+    let weekRevenue = 0;
+    let monthRevenue = 0;
+
+    const now = new Date();
+
+    orders.forEach((order: any) => {
+      const orderTotal = typeof order.total === 'number' ? order.total : 0;
+      totalRevenue += orderTotal;
+
+      const createdAt = new Date(order.createdAt);
+      if (Number.isNaN(createdAt.getTime())) return;
+
+      const sameDay =
+        createdAt.getDate() === now.getDate() &&
+        createdAt.getMonth() === now.getMonth() &&
+        createdAt.getFullYear() === now.getFullYear();
+
+      if (sameDay) {
+        todayRevenue += orderTotal;
+      }
+
+      const diffTime = now.getTime() - createdAt.getTime();
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+      if (diffDays >= 0 && diffDays < 7) {
+        weekRevenue += orderTotal;
+      }
+
+      if (
+        createdAt.getMonth() === now.getMonth() &&
+        createdAt.getFullYear() === now.getFullYear()
+      ) {
+        monthRevenue += orderTotal;
+      }
+    });
 
     setStats({
       totalUsers,
       totalProducts: 8,
-      totalOrders: Math.floor(Math.random() * 100), // Mock data
+      totalOrders,
       totalRevenue,
       averageRating,
       totalReviews
     });
-  }, [usersData, reviewsData, cartData]);
+
+    setRevenueStats({
+      today: todayRevenue,
+      thisWeek: weekRevenue,
+      thisMonth: monthRevenue,
+    });
+  }, [usersData, reviewsData, ordersData]);
 
   const recentUsers = usersData.slice(-5).reverse();
   const recentReviews = reviewsData.slice(-5).reverse();
@@ -150,6 +199,24 @@ export default function AdminDashboard() {
                 <h3>Tổng đánh giá</h3>
                 <p className="stat-number">{stats.totalReviews}</p>
                 <span className="stat-change positive">+{Math.floor(Math.random() * 10)} tuần này</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="revenue-summary">
+            <h3>Thống kê doanh thu</h3>
+            <div className="revenue-summary-grid">
+              <div className="summary-item">
+                <span>Hôm nay</span>
+                <strong>{formatPriceSafe(revenueStats.today)}</strong>
+              </div>
+              <div className="summary-item">
+                <span>7 ngày gần đây</span>
+                <strong>{formatPriceSafe(revenueStats.thisWeek)}</strong>
+              </div>
+              <div className="summary-item">
+                <span>Tháng này</span>
+                <strong>{formatPriceSafe(revenueStats.thisMonth)}</strong>
               </div>
             </div>
           </div>
@@ -281,4 +348,3 @@ export default function AdminDashboard() {
     </>
   );
 }
-

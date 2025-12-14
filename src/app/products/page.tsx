@@ -1,226 +1,255 @@
 'use client';
 
+import { SyntheticEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formatCurrency } from "@/utils";
-import { useState, useEffect } from "react";
+import { products as PRODUCTS_DATA, Product } from "@/data/products";
 
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  oldPrice?: number;
-  image: string;
-  brand: string;
-  badge?: string;
-}
+const PRODUCTS: Product[] = PRODUCTS_DATA;
 
-export default function Products() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [brandFilter, setBrandFilter] = useState('');
-  const [priceFilter, setPriceFilter] = useState('');
-  const [sortBy, setSortBy] = useState('name');
+const FALLBACK_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 240' role='img' aria-label='Placeholder'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230ea5e9'/%3E%3Cstop offset='100%25' stop-color='%236366f1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='320' height='240' rx='18' fill='url(%23g)'/%3E%3Crect x='98' y='24' width='124' height='192' rx='16' fill='%23111' stroke='%23222' stroke-width='3'/%3E%3Crect x='112' y='52' width='96' height='136' rx='12' fill='%23182'/%3E%3Ccircle cx='160' cy='38' r='4' fill='%23cbd5e1'/%3E%3Crect x='136' y='40' width='48' height='5' rx='2.5' fill='%23cbd5e1'/%3E%3Ccircle cx='160' cy='206' r='5' fill='%23cbd5e1'/%3E%3Ctext x='160' y='192' fill='%23e2e8f0' font-family='Arial, sans-serif' font-size='14' text-anchor='middle'%3EPhoneStore%3C/text%3E%3C/svg%3E";
 
-  const initialProducts: Product[] = [
-    {
-      id: 1,
-      name: 'iPhone 15 Pro',
-      description: 'Chip A17 Pro mạnh mẽ, camera 48MP',
-      price: 29990000,
-      oldPrice: 32990000,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=500&q=80',
-      brand: 'iphone',
-      badge: 'Mới',
-    },
-    {
-      id: 2,
-      name: 'Samsung Galaxy S24',
-      description: 'AI tích hợp, màn hình Dynamic AMOLED 2X',
-      price: 19990000,
-      oldPrice: 22990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
-      brand: 'samsung',
-      badge: 'Hot',
-    },
-    {
-      id: 3,
-      name: 'Xiaomi 14',
-      description: 'Snapdragon 8 Gen 3, camera Leica',
-      price: 15990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
-      brand: 'xiaomi',
-    },
-    {
-      id: 4,
-      name: 'OPPO Find X7',
-      description: 'Camera Hasselblad, sạc nhanh 100W',
-      price: 12990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
-      brand: 'oppo',
-    },
-    {
-      id: 5,
-      name: 'iPhone 15',
-      description: 'Chip A16 Bionic, camera 48MP',
-      price: 24990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
-      brand: 'iphone',
-    },
-    {
-      id: 6,
-      name: 'Samsung Galaxy A55',
-      description: 'Exynos 1480, camera 50MP',
-      price: 17990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
-      brand: 'samsung',
-    },
-    {
-      id: 7,
-      name: 'Xiaomi Redmi Note 13',
-      description: 'Snapdragon 685, camera 108MP',
-      price: 8990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
-      brand: 'xiaomi',
-    },
-    {
-      id: 8,
-      name: 'Vivo X100',
-      description: 'MediaTek Dimensity 9300, camera ZEISS',
-      price: 11990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
-      brand: 'vivo',
-    },
-  ];
+export default function ProductsPage() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("q") ?? "";
+  const initialBrand = searchParams.get("brand") ?? "";
+
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(PRODUCTS);
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [brandFilter, setBrandFilter] = useState(initialBrand);
+  const [priceFilter, setPriceFilter] = useState("");
+  const [sortBy, setSortBy] = useState<"name" | "price-low" | "price-high" | "newest">(
+    "name",
+  );
 
   useEffect(() => {
-    setProducts(initialProducts);
-    setFilteredProducts(initialProducts);
-  }, []);
+    const fromUrl = searchParams.get("q") ?? "";
+    const brandFromUrl = searchParams.get("brand") ?? "";
+    setSearchTerm(fromUrl);
+    setBrandFilter(brandFromUrl);
+  }, [searchParams]);
 
   useEffect(() => {
-    const filtered = products.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesBrand = !brandFilter || product.brand === brandFilter;
-      const matchesPrice = !priceFilter || checkPriceRange(product.price, priceFilter);
-      return matchesSearch && matchesBrand && matchesPrice;
-    });
+    let result = [...PRODUCTS];
 
-    filtered.sort((a, b) => {
+    // Lọc theo tên sản phẩm
+    if (searchTerm.trim()) {
+      const keyword = searchTerm.toLowerCase();
+      result = result.filter((p) => p.name.toLowerCase().includes(keyword));
+    }
+
+    // Lọc theo hãng
+    if (brandFilter) {
+      result = result.filter((p) => p.brand === brandFilter);
+    }
+
+    // Lọc theo khoảng giá
+    if (priceFilter) {
+      const [min, max] = priceFilter.split("-").map(Number);
+      result = result.filter((p) => p.price >= min && p.price <= max);
+    }
+
+    // Sắp xếp
+    result.sort((a, b) => {
       switch (sortBy) {
-        case 'name':
+        case "name":
           return a.name.localeCompare(b.name);
-        case 'price-low':
+        case "price-low":
           return a.price - b.price;
-        case 'price-high':
+        case "price-high":
           return b.price - a.price;
-        case 'newest':
+        case "newest":
           return b.id - a.id;
         default:
           return 0;
       }
     });
 
-    setFilteredProducts(filtered);
-  }, [products, searchTerm, brandFilter, priceFilter, sortBy]);
-
-  const checkPriceRange = (price: number, range: string) => {
-    const [min, max] = range.split('-').map(Number);
-    return price >= min && price <= max;
-  };
+    setFilteredProducts(result);
+  }, [searchTerm, brandFilter, priceFilter, sortBy]);
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setBrandFilter('');
-    setPriceFilter('');
-    setSortBy('name');
+    setSearchTerm("");
+    setBrandFilter("");
+    setPriceFilter("");
+    setSortBy("name");
   };
 
-  const formatPriceSafe = (price: number) => formatCurrency(price);
+  const handleAddToCart = (product: Product) => {
+    const raw = localStorage.getItem("cart");
+    const cart: any[] = raw ? JSON.parse(raw) : [];
+
+    const variantText = "Mặc định";
+    const existing = cart.find(
+      (item) => item.id === product.id && item.variant === variantText,
+    );
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        variant: variantText,
+        image: product.image,
+      });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("Đã thêm sản phẩm vào giỏ hàng!");
+  };
+
+  const handleImageError = (event: SyntheticEvent<HTMLImageElement>) => {
+    const img = event.currentTarget;
+    if (img.src !== FALLBACK_IMAGE) {
+      img.src = FALLBACK_IMAGE;
+      img.srcset = FALLBACK_IMAGE;
+    }
+  };
 
   return (
     <>
       <Header activePage="products" />
 
-      {/* Page Header */}
       <section className="page-header">
         <div className="container">
           <h1>Sản phẩm</h1>
-          <p>Khám phá bộ sưu tập điện thoại đa dạng từ các thương hiệu hàng đầu</p>
+          <p>Tìm kiếm và lọc các mẫu điện thoại theo nhu cầu của bạn.</p>
         </div>
       </section>
 
-      {/* Filter Section */}
+      {/* Bộ lọc đơn giản */}
       <section className="filter-section">
         <div className="container">
           <div className="filter-container">
             <div className="filter-group">
+              <label htmlFor="search">Tìm kiếm:</label>
+              <input
+                id="search"
+                type="text"
+                placeholder="Nhập tên sản phẩm..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="filter-group">
               <label htmlFor="brand-filter">Thương hiệu:</label>
-              <select id="brand-filter" value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)}>
+              <select
+                id="brand-filter"
+                value={brandFilter}
+                onChange={(e) => setBrandFilter(e.target.value)}
+              >
                 <option value="">Tất cả</option>
                 <option value="iphone">iPhone</option>
                 <option value="samsung">Samsung</option>
                 <option value="xiaomi">Xiaomi</option>
                 <option value="oppo">OPPO</option>
                 <option value="vivo">Vivo</option>
+                <option value="pixel">Pixel</option>
+                <option value="realme">Realme</option>
+                <option value="asus">ASUS</option>
+                <option value="nokia">Nokia</option>
               </select>
             </div>
+
             <div className="filter-group">
-              <label htmlFor="price-filter">Giá:</label>
-              <select id="price-filter" value={priceFilter} onChange={(e) => setPriceFilter(e.target.value)}>
+              <label htmlFor="price-filter">Khoảng giá:</label>
+              <select
+                id="price-filter"
+                value={priceFilter}
+                onChange={(e) => setPriceFilter(e.target.value)}
+              >
                 <option value="">Tất cả</option>
                 <option value="0-5000000">Dưới 5 triệu</option>
-                <option value="5000000-10000000">5-10 triệu</option>
-                <option value="10000000-20000000">10-20 triệu</option>
+                <option value="5000000-10000000">5 - 10 triệu</option>
+                <option value="10000000-20000000">10 - 20 triệu</option>
                 <option value="20000000-999999999">Trên 20 triệu</option>
               </select>
             </div>
+
             <div className="filter-group">
-              <label htmlFor="sort-filter">Sắp xếp:</label>
-              <select id="sort-filter" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <label htmlFor="sort-by">Sắp xếp:</label>
+              <select
+                id="sort-by"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+              >
                 <option value="name">Tên A-Z</option>
                 <option value="price-low">Giá thấp đến cao</option>
                 <option value="price-high">Giá cao đến thấp</option>
                 <option value="newest">Mới nhất</option>
               </select>
             </div>
-            <button className="btn btn-outline" onClick={clearFilters}>Xóa bộ lọc</button>
+
+            <button className="btn btn-outline" onClick={clearFilters}>
+              Xóa bộ lọc
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Products Grid */}
+      {/* Danh sách sản phẩm */}
       <section className="products-section">
         <div className="container">
           <div className="products-grid">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
-                <div key={product.id} className="product-card">
-                  <div className="product-image">
-                    <Image src={product.image} alt={product.name} width={280} height={250} />
-                    {product.badge && <div className="product-badge">{product.badge}</div>}
-                  </div>
-                  <div className="product-info">
-                    <h3>{product.name}</h3>
-                    <p className="product-description">{product.description}</p>
-                    <div className="product-price">
-                      <span className="current-price">{formatPriceSafe(product.price)}</span>
-                      {product.oldPrice && <span className="old-price">{formatPriceSafe(product.oldPrice)}</span>}
-                    </div>
-                    <button className="btn btn-primary">Thêm vào giỏ</button>
-                  </div>
-                </div>
-              ))
-            ) : (
+            {filteredProducts.length === 0 && (
               <div className="no-results">
-                <h3>Không tìm thấy sản phẩm nào</h3>
-                <p>Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+                <h3>Không tìm thấy sản phẩm phù hợp</h3>
+                <p>Hãy thử đổi từ khóa hoặc bộ lọc khác.</p>
               </div>
             )}
+
+            {filteredProducts.map((product) => (
+              <div key={product.id} className="product-card">
+                <div className="product-image">
+                  <Link href={`/products/${product.id}`}>
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      width={280}
+                      height={250}
+                      onError={handleImageError}
+                    />
+                  </Link>
+                  {product.badge && (
+                    <div className="product-badge">{product.badge}</div>
+                  )}
+                </div>
+
+                <div className="product-info">
+                  <h3>
+                    <Link href={`/products/${product.id}`}>{product.name}</Link>
+                  </h3>
+                  <p className="product-description">{product.description}</p>
+
+                  <div className="product-price">
+                    <span className="current-price">
+                      {formatCurrency(product.price)}
+                    </span>
+                    {product.oldPrice && (
+                      <span className="old-price">
+                        {formatCurrency(product.oldPrice)}
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleAddToCart(product)}
+                  >
+                    Thêm vào giỏ
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -229,4 +258,3 @@ export default function Products() {
     </>
   );
 }
-

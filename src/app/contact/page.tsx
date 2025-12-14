@@ -175,20 +175,30 @@ export default function Contact() {
       <section className="faq-section">
         <div className="container">
           <h2 className="section-title">Câu hỏi thường gặp</h2>
-          <div className="faq-container">
-            {faqs.map((faq, index) => (
-              <div key={index} className={`faq-item ${activeFaq === index ? 'active' : ''}`}>
-                <div className="faq-question" onClick={() => toggleFaq(index)}>
-                  <h3>{faq.question}</h3>
-                  <i className={`fas fa-chevron-down ${activeFaq === index ? 'rotated' : ''}`}></i>
-                </div>
-                <div className="faq-answer" style={{ maxHeight: activeFaq === index ? '200px' : '0' }}>
-                  <p>{faq.answer}</p>
+                <div className="faq-container">
+                  {faqs.map((faq, index) => (
+                    <div key={index} className={`faq-item ${activeFaq === index ? 'active' : ''}`}>
+                      <div className="faq-question" onClick={() => toggleFaq(index)}>
+                        <h3>{faq.question}</h3>
+                        <i className={`fas fa-chevron-down ${activeFaq === index ? 'rotated' : ''}`}></i>
+                      </div>
+                      <div className="faq-answer" style={{ maxHeight: activeFaq === index ? '200px' : '0' }}>
+                        {index === 0 ? (
+                          <p>
+                            Bạn có thể đặt hàng online bằng cách:
+                            <br />1) Chọn sản phẩm yêu thích
+                            <br />2) Thêm vào giỏ hàng
+                            <br />3) Kiểm tra thông tin đơn hàng
+                            <br />4) Chọn phương thức thanh toán và hoàn tất đặt hàng
+                          </p>
+                        ) : (
+                          <p>{faq.answer}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
       </section>
 
       <Footer />

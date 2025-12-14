@@ -17,7 +17,6 @@ export interface Product {
 // Kiểu dữ liệu cho giỏ hàng
 export interface CartItem {
   id: number;
-  productId: number;
   name: string;
   price: number;
   quantity: number;
