@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, Inter } from "next/font/google";
-import "./globals.css";
+import "./globals.css";  // de moi page deu dung chung style 
 
 
 const inter = Inter({
@@ -31,3 +31,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+// “RootLayout là layout gốc, bọc toàn bộ website, đặt CSS/font/SEO dùng chung và render nội dung từng trang qua children.”

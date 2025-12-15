@@ -27,7 +27,7 @@ export default function Promotions() {
       id: 1,
       title: "FLASH SALE iPhone 15 Pro",
       description: "Giảm giá sốc iPhone 15 Pro chỉ trong 24h. Số lượng có hạn!",
-      image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+      image: "/images/products/iphone-15-pro.jpg",
       discount: "-15%",
       originalPrice: 32990000,
       salePrice: 28041500,
@@ -39,7 +39,7 @@ export default function Promotions() {
       id: 2,
       title: "Combo Samsung Galaxy S24 + Phụ kiện",
       description: "Mua Galaxy S24 nhận kèm tai nghe Galaxy Buds Pro và ốp lưng chính hãng",
-      image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+      image: "/images/products/samsung-s24-ultra.jpg",
       discount: "Combo",
       validUntil: "25/12/2024",
       type: 'combo',
@@ -49,7 +49,7 @@ export default function Promotions() {
       id: 3,
       title: "Hoàn tiền 2 triệu cho đơn hàng trên 20 triệu",
       description: "Mua điện thoại trên 20 triệu được hoàn tiền 2 triệu vào tài khoản",
-      image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+      image: "/images/products/oppo-find-x7.jpg",
       discount: "2M",
       validUntil: "28/12/2024",
       type: 'cashback',
@@ -59,7 +59,7 @@ export default function Promotions() {
       id: 4,
       title: "Tặng kèm ốp lưng và dán màn hình",
       description: "Mua bất kỳ điện thoại nào đều được tặng kèm ốp lưng và dán màn hình",
-      image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+      image: "/images/products/iphone-15.jpg",
       discount: "Quà tặng",
       validUntil: "30/12/2024",
       type: 'gift',
@@ -69,7 +69,7 @@ export default function Promotions() {
       id: 5,
       title: "FLASH SALE Xiaomi 14 Ultra",
       description: "Giảm giá 20% cho Xiaomi 14 Ultra chỉ trong ngày hôm nay",
-      image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+      image: "/images/products/xiaomi-14.jpg",
       discount: "-20%",
       originalPrice: 22990000,
       salePrice: 18392000,
@@ -81,7 +81,7 @@ export default function Promotions() {
       id: 6,
       title: "Combo OPPO Find X7 + Sạc nhanh",
       description: "Mua OPPO Find X7 nhận kèm sạc nhanh 100W và cáp USB-C",
-      image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+      image: "/images/products/vivo-x100.jpg",
       discount: "Combo",
       validUntil: "22/12/2024",
       type: 'combo',
@@ -92,8 +92,8 @@ export default function Promotions() {
   const promotionTypes = [
     { value: 'all', label: 'Tất cả', icon: 'fas fa-fire' },
     { value: 'flash', label: 'Flash Sale', icon: 'fas fa-bolt' },
-    { value: 'combo', label: 'Combo', icon: 'fas fa-gift' },
-    { value: 'cashback', label: 'Hoàn tiền', icon: 'fas fa-money-bill-wave' },
+    { value: 'combo', label: 'Combo', icon: 'fas fa-box-open' },
+    { value: 'cashback', label: 'Hoàn tiền', icon: 'fas fa-coins' },
     { value: 'gift', label: 'Quà tặng', icon: 'fas fa-gift' }
   ];
 
@@ -158,13 +158,13 @@ export default function Promotions() {
                     width={350}
                     height={200}
                   />
-                  <div className="promotion-badge">
+                  <div className={`promotion-badge badge-${promotion.type}`}>
                     <i className={getTypeIcon(promotion.type)}></i>
                     {promotion.discount}
                   </div>
                   {!promotion.isActive && (
                     <div className="expired-overlay">
-                      <span>Hết hạn</span>
+                      <span>Hết hàng</span>
                     </div>
                   )}
                 </div>
@@ -196,7 +196,7 @@ export default function Promotions() {
                     className={`btn ${promotion.isActive ? 'btn-primary' : 'btn-outline'}`}
                     disabled={!promotion.isActive}
                   >
-                    {promotion.isActive ? 'Xem chi tiết' : 'Hết hạn'}
+                    {promotion.isActive ? 'Xem chi tiết' : 'Hết hàng'}
                   </button>
                 </div>
               </div>

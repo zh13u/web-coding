@@ -1,15 +1,18 @@
 'use client';
-
+//  file này dùng  useState nên phai chạy ở trình duyệt -> cần "use client"
 import Link from "next/link";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import ProductCard from "@/components/ProductCard";
+import Header from "@/components/Header";  // header o dau trang 
+import Footer from "@/components/Footer";  // Footer o cuoi trang
+import ProductCard from "@/components/ProductCard"; // danh sach san pham 
 import { useState } from "react";
 import { products } from "@/data/products";
 
 // Lấy 4 sản phẩm đầu tiên để hiển thị ở trang chủ
-const demoProducts = products.slice(0, 4);
+const demoProducts = products.slice(0, 4);  // lay 4 san pham de hien thi o dau trang 
 
+
+
+// day la compoment trang / , cartcount dem so mon trong gio hang 
 export default function Home() {
   const [cartCount, setCartCount] = useState(0);
 
@@ -43,7 +46,7 @@ export default function Home() {
         <div className="container">
           <h2 className="section-title">Sản phẩm nổi bật</h2>
           <div className="products-grid">
-            {demoProducts.map((product) => (
+            {demoProducts.map((product) => (  // map chạy qua 4 sản phẩm -> mỗi cái tạo ra 1 productcard
               <ProductCard
                 key={product.id}
                 id={product.id}

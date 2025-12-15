@@ -175,13 +175,23 @@ export default function Header({ activePage = '' }: HeaderProps) {
               <DarkModeToggle />
 
               <div className="cart-icon">
-                <Link href="/wishlist" title="Yêu thích" className="wishlist-icon">
+                <Link
+                  href="/wishlist"
+                  title="Yêu thích"
+                  aria-label="Xem danh sách yêu thích"
+                  className="wishlist-icon"
+                >
                   <i className="fas fa-heart" />
                   {wishlistCount > 0 && (
                     <span className="wishlist-count">{wishlistCount}</span>
                   )}
                 </Link>
-                <Link href="/cart" title="Giỏ hàng" className="wishlist-icon">
+                <Link
+                  href="/cart"
+                  title="Giỏ hàng"
+                  aria-label="Xem giỏ hàng"
+                  className="wishlist-icon"
+                >
                   <i className="fas fa-shopping-cart" />
                   {cartCount > 0 && (
                     <span className="wishlist-count">{cartCount}</span>
