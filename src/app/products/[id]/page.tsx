@@ -3,8 +3,10 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductDetail from "@/components/ProductDetail";
-import { products } from "@/data/products";
+import { products as DEFAULT_PRODUCTS } from "@/data/products";
 import { useRouter } from "next/navigation";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import type { Product } from "@/types";
 
 interface PageProps {
   params: { id: string };
@@ -13,6 +15,7 @@ interface PageProps {
 export default function ProductDetailPage({ params }: PageProps) {
   const router = useRouter();
   const productId = parseInt(params.id, 10);
+  const [products] = useLocalStorage<Product[]>("products", DEFAULT_PRODUCTS);
   const product = products.find((p) => p.id === productId);
 
   if (!product) {
@@ -52,11 +55,16 @@ export default function ProductDetailPage({ params }: PageProps) {
     'Hỗ trợ sạc nhanh',
   ];
 
+  // Them san pham theo phien ban mau/bo nho vao localStorage
   const handleAddToCart = (
     productId: number,
     variant: { color: string; storage: string; price: number },
     quantity: number,
   ) => {
+    if (product.inStock === false) {
+      alert("San pham dang het hang.");
+      return;
+    }
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const variantText = `Màu: ${variant.color} | Dung lượng: ${variant.storage}`;
 
@@ -81,6 +89,7 @@ export default function ProductDetailPage({ params }: PageProps) {
     alert('Đã thêm sản phẩm vào giỏ hàng!');
   };
 
+  // Mua ngay = them vao gio + dieu huong checkout
   const handleBuyNow = (
     productId: number,
     variant: { color: string; storage: string; price: number },

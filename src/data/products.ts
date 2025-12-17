@@ -1,13 +1,6 @@
-export interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  oldPrice?: number;
-  image: string;
-  brand: string;
-  badge?: string;
-}
+import type { Product } from "@/types";
+
+// la nguon du lieu san pham, page nao can thi import roi render 
 
 const phoneArt = (
   title: string,
@@ -45,6 +38,8 @@ export const products: Product[] = [
     oldPrice: 32_990_000,
     image: "/images/products/iphone-15-pro.jpg",
     brand: "iphone",
+    category: "Flagship",
+    inStock: true,
     badge: "Mới",
   },
   {
@@ -55,6 +50,8 @@ export const products: Product[] = [
     oldPrice: 28_990_000,
     image: "/images/products/samsung-s24-ultra.jpg",
     brand: "samsung",
+    category: "Flagship",
+    inStock: true,
     badge: "Hot",
   },
   {
@@ -64,6 +61,8 @@ export const products: Product[] = [
     price: 15_990_000,
     image: "/images/products/xiaomi-14.jpg",
     brand: "xiaomi",
+    category: "Smartphone",
+    inStock: true,
     badge: "Mới",
   },
   {
@@ -73,6 +72,8 @@ export const products: Product[] = [
     price: 12_990_000,
     image: "/images/products/oppo-find-x7.jpg",
     brand: "oppo",
+    category: "Smartphone",
+    inStock: true,
   },
   {
     id: 5,
@@ -81,6 +82,8 @@ export const products: Product[] = [
     price: 11_990_000,
     image: "/images/products/vivo-x100.jpg",
     brand: "vivo",
+    category: "Smartphone",
+    inStock: true,
   },
   {
     id: 6,
@@ -89,6 +92,8 @@ export const products: Product[] = [
     price: 23_990_000,
     image: "/images/products/pixel-8-pro.jpg",
     brand: "pixel",
+    category: "Flagship",
+    inStock: true,
     badge: "Mới",
   },
   {
@@ -98,6 +103,8 @@ export const products: Product[] = [
     price: 17_990_000,
     image: "/images/products/samsung-a55.jpg",
     brand: "samsung",
+    category: "Budget",
+    inStock: true,
   },
   {
     id: 8,
@@ -106,6 +113,8 @@ export const products: Product[] = [
     price: 8_990_000,
     image: "/images/products/xiaomi-redmi-note-13.jpg",
     brand: "xiaomi",
+    category: "Budget",
+    inStock: true,
   },
   {
     id: 9,
@@ -114,6 +123,8 @@ export const products: Product[] = [
     price: 10_990_000,
     image: "/images/products/realme-12-pro-plus.jpg",
     brand: "realme",
+    category: "Budget",
+    inStock: true,
   },
   {
     id: 10,
@@ -122,6 +133,8 @@ export const products: Product[] = [
     price: 24_490_000,
     image: "/images/products/asus-rog-phone-8.jpg",
     brand: "asus",
+    category: "Gaming",
+    inStock: true,
   },
   {
     id: 11,
@@ -130,6 +143,8 @@ export const products: Product[] = [
     price: 5_990_000,
     image: "/images/products/nokia-g50.jpg",
     brand: "nokia",
+    category: "Budget",
+    inStock: false,
   },
   {
     id: 12,
@@ -138,5 +153,7 @@ export const products: Product[] = [
     price: 24_990_000,
     image: "/images/products/iphone-15.jpg",
     brand: "iphone",
+    category: "Smartphone",
+    inStock: true,
   },
 ];

@@ -11,11 +11,12 @@ import { formatCurrency } from '@/utils';
 
 export default function Orders() {
   const router = useRouter();
-  const [currentUser] = useLocalStorage<any>('currentUser', null);
+  const [currentUser] = useLocalStorage<{ id?: number; name: string; email: string } | null>('currentUser', null);
   const [orders, setOrders] = useState<any[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
 
+  // Chi hien thi don cua user dang dang nhap, neu chua co user thi quay ve home
   useEffect(() => {
     if (!currentUser) {
       router.push('/');
@@ -23,11 +24,18 @@ export default function Orders() {
     }
 
     const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const userOrders = allOrders.filter((order: any) => order.customer.email === currentUser.email);
+    const userEmail = currentUser.email;
+    const userId = currentUser.id;
+    const userOrders = allOrders.filter((order: any) => {
+      if (userId && order.accountId && order.accountId === userId) return true;
+      if (order.accountEmail && order.accountEmail === userEmail) return true;
+      return order.customer?.email === userEmail;
+    });
     setOrders(userOrders);
     setFilteredOrders(userOrders);
   }, [currentUser, router]);
 
+  // Bo loc theo trang thai don hang
   useEffect(() => {
     setFilteredOrders(statusFilter === 'all' ? orders : orders.filter(order => order.status === statusFilter));
   }, [statusFilter, orders]);
@@ -64,6 +72,7 @@ export default function Orders() {
     return statusClasses[status] || 'status-pending';
   };
 
+  // Cap nhat trang thai don trong localStorage khi nguoi dung huy
   const cancelOrder = (orderId: string) => {
     if (confirm('Bạn có chắc muốn hủy đơn hàng này?')) {
       const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
@@ -176,4 +185,3 @@ export default function Orders() {
     </>
   );
 }
-

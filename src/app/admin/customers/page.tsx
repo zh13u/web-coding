@@ -4,10 +4,13 @@ import { useState, useEffect } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useAdminGuard } from '@/hooks/useAdminGuard';
 import Alert from '@/components/Alert';
 
 export default function AdminCustomers() {
-  const [currentUser] = useLocalStorage<any>('currentUser', null);
+  const { currentAdmin } = useAdminGuard();
+  const [usersData, setUsersData] = useLocalStorage<any[]>('users', []);
+  const [ordersData] = useLocalStorage<any[]>('orders', []);
   const [customers, setCustomers] = useState<any[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,13 +19,13 @@ export default function AdminCustomers() {
   const [alertMessage, setAlertMessage] = useState('');
 
   useEffect(() => {
-    // Load customers from localStorage
-    const usersData = JSON.parse(localStorage.getItem('users') || '[]');
-    const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    
     // Create customer list with order statistics
     const customerData = usersData.map((user: any) => {
-      const userOrders = allOrders.filter((order: any) => order.customer.email === user.email);
+      const userOrders = ordersData.filter((order: any) => {
+        if (order.accountId && order.accountId === user.id) return true;
+        if (order.accountEmail && order.accountEmail === user.email) return true;
+        return order.customer?.email === user.email;
+      });
       const totalSpent = userOrders.reduce((sum: number, order: any) => sum + order.total, 0);
       const orderCount = userOrders.length;
       
@@ -37,7 +40,7 @@ export default function AdminCustomers() {
     
     setCustomers(customerData);
     setFilteredCustomers(customerData);
-  }, []);
+  }, [ordersData, usersData]);
 
   useEffect(() => {
     let filtered = customers;
@@ -78,14 +81,13 @@ export default function AdminCustomers() {
         : customer
     );
     
-    // Update localStorage
-    const usersData = JSON.parse(localStorage.getItem('users') || '[]');
-    const updatedUsers = usersData.map((user: any) =>
-      user.id === customerId 
-        ? { ...user, isActive: updatedCustomers.find(c => c.id === customerId)?.status === 'active' }
-        : user
+    setUsersData(prev =>
+      prev.map((user: any) =>
+        user.id === customerId
+          ? { ...user, isActive: updatedCustomers.find(c => c.id === customerId)?.status === 'active' }
+          : user
+      )
     );
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
     
     setCustomers(updatedCustomers);
     
@@ -100,10 +102,7 @@ export default function AdminCustomers() {
     if (confirm(`Bạn có chắc chắn muốn xóa khách hàng ${customer?.name}? Hành động này không thể hoàn tác.`)) {
       const updatedCustomers = customers.filter(c => c.id !== customerId);
       
-      // Update localStorage
-      const usersData = JSON.parse(localStorage.getItem('users') || '[]');
-      const updatedUsers = usersData.filter((user: any) => user.id !== customerId);
-      localStorage.setItem('users', JSON.stringify(updatedUsers));
+      setUsersData((prev: any[]) => prev.filter((user) => user.id !== customerId));
       
       setCustomers(updatedCustomers);
       setAlertMessage(`Đã xóa khách hàng ${customer?.name} thành công!`);
@@ -112,7 +111,7 @@ export default function AdminCustomers() {
     }
   };
 
-  if (!currentUser) {
+  if (!currentAdmin) {
     return (
       <>
         <Header />
@@ -281,4 +280,3 @@ export default function AdminCustomers() {
     </>
   );
 }
-

@@ -15,6 +15,7 @@ export default function WishlistPage() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
+  // Xoa 1 item khoi wishlist va thong bao thanh cong
   const removeFromWishlist = (id: number) => {
     setWishlistItems((prev) => prev.filter((item) => item.id !== id));
     setAlertMessage("Đã xóa sản phẩm khỏi danh sách yêu thích!");
@@ -22,6 +23,7 @@ export default function WishlistPage() {
     setTimeout(() => setShowAlert(false), 3000);
   };
 
+  // Them vao gio hang, neu da ton tai thi tang quantity
   const addToCart = (product: any) => {
     const variantText = product.variant || "Mặc định";
 
@@ -162,4 +164,3 @@ export default function WishlistPage() {
     </>
   );
 }
-

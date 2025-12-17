@@ -1,55 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useAdminGuard } from '@/hooks/useAdminGuard';
 import type { AdminAccount, AdminRole } from '@/types';
 import Alert from '@/components/Alert';
+import { adminAccounts as DEFAULT_ADMINS } from "@/data/adminAccounts";
 
 export default function AdminAccounts() {
-  const [currentUser] = useLocalStorage<{ name: string; email: string } | null>('currentUser', null);
-  const [admins, setAdmins] = useState<AdminAccount[]>([]);
+  const { currentAdmin } = useAdminGuard();
+  const [admins, setAdmins] = useLocalStorage<AdminAccount[]>(
+    'adminAccounts',
+    DEFAULT_ADMINS,
+  );
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<AdminAccount | null>(null);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Mock data - trong thực tế sẽ fetch từ API
-  const mockAdmins: AdminAccount[] = [
-    {
-      id: 1,
-      name: 'Admin Chính',
-      email: 'admin@phonestore.com',
-      role: 'super_admin',
-      isActive: true,
-      createdAt: '2024-01-01',
-      lastLogin: '2024-12-15'
-    },
-    {
-      id: 2,
-      name: 'Quản lý sản phẩm',
-      email: 'product@phonestore.com',
-      role: 'product_manager',
-      isActive: true,
-      createdAt: '2024-01-15',
-      lastLogin: '2024-12-14'
-    },
-    {
-      id: 3,
-      name: 'Quản lý đơn hàng',
-      email: 'order@phonestore.com',
-      role: 'order_manager',
-      isActive: false,
-      createdAt: '2024-02-01',
-      lastLogin: '2024-11-20'
-    }
-  ];
-
-  useEffect(() => {
-    setAdmins(mockAdmins);
-  }, []);
 
   const showAlertMessage = (message: string) => {
     setAlertMessage(message);
@@ -77,8 +48,10 @@ export default function AdminAccounts() {
   const handleSaveAdmin = (adminData: Omit<AdminAccount, 'id' | 'createdAt' | 'lastLogin'> & { password?: string }) => {
     if (editingAdmin) {
       // Edit existing admin
-      setAdmins(prev => prev.map(a => 
-        a.id === editingAdmin.id ? { ...a, ...adminData } : a
+      setAdmins(prev => prev.map(a =>
+        a.id === editingAdmin.id
+          ? { ...a, ...adminData, password: adminData.password ?? a.password }
+          : a
       ));
       showAlertMessage('Đã cập nhật tài khoản admin thành công!');
     } else {
@@ -90,7 +63,8 @@ export default function AdminAccounts() {
         role: adminData.role as AdminRole,
         isActive: adminData.isActive,
         createdAt: new Date().toISOString().split('T')[0],
-        lastLogin: null
+        lastLogin: null,
+        password: adminData.password
       };
       setAdmins(prev => [...prev, newAdmin]);
       showAlertMessage('Đã thêm tài khoản admin mới thành công!');
@@ -128,7 +102,7 @@ export default function AdminAccounts() {
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
-  if (!currentUser) {
+  if (!currentAdmin) {
     return (
       <>
         <Header />
@@ -447,4 +421,3 @@ function AdminForm({ admin, onSave, onCancel }: { admin: AdminAccount | null; on
     </div>
   );
 }
-

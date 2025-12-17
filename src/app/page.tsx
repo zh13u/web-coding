@@ -5,16 +5,19 @@ import Header from "@/components/Header";  // header o dau trang
 import Footer from "@/components/Footer";  // Footer o cuoi trang
 import ProductCard from "@/components/ProductCard"; // danh sach san pham 
 import { useState } from "react";
-import { products } from "@/data/products";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { products as DEFAULT_PRODUCTS } from "@/data/products";
+import type { Product } from "@/types";
 
 // Lấy 4 sản phẩm đầu tiên để hiển thị ở trang chủ
-const demoProducts = products.slice(0, 4);  // lay 4 san pham de hien thi o dau trang 
 
 
 
 // day la compoment trang / , cartcount dem so mon trong gio hang 
 export default function Home() {
   const [cartCount, setCartCount] = useState(0);
+  const [products] = useLocalStorage<Product[]>("products", DEFAULT_PRODUCTS);
+  const demoProducts = products.slice(0, 4);
 
   // Ở trang chủ chỉ tăng số lượng giỏ hàng demo và hiện log,
   // phần lưu thật vào localStorage sẽ xử lý ở các trang khác nếu cần.
@@ -56,7 +59,7 @@ export default function Home() {
                 oldPrice={product.oldPrice}
                 image={product.image}
                 badge={product.badge}
-                onAddToCart={handleAddToCart}
+                onAddToCart={handleAddToCart} // ở trang home là cha có 1 hàm ->  home đưa hàm này xuống ProductCard qua props
               />
             ))}
           </div>

@@ -5,23 +5,17 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useAdminGuard } from '@/hooks/useAdminGuard';
 import Alert from '@/components/Alert';
 
 export default function AdminOrders() {
-  const [currentUser] = useLocalStorage<any>('currentUser', null);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
+  const { currentAdmin } = useAdminGuard();
+  const [orders, setOrders] = useLocalStorage<any[]>('orders', []);
+  const [filteredOrders, setFilteredOrders] = useState<any[]>(orders);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-
-  useEffect(() => {
-    // Load orders from localStorage
-    const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    setOrders(allOrders);
-    setFilteredOrders(allOrders);
-  }, []);
 
   useEffect(() => {
     let filtered = orders;
@@ -36,7 +30,8 @@ export default function AdminOrders() {
       filtered = filtered.filter(order => 
         order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.customer.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+        order.customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.accountEmail || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -84,12 +79,6 @@ export default function AdminOrders() {
   };
 
   const updateOrderStatus = (orderId: string, newStatus: string) => {
-    const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const updatedOrders = allOrders.map((order: any) =>
-      order.id === orderId ? { ...order, status: newStatus } : order
-    );
-    localStorage.setItem('orders', JSON.stringify(updatedOrders));
-    
     // Update local state
     setOrders(prev => prev.map(order =>
       order.id === orderId ? { ...order, status: newStatus } : order
@@ -111,7 +100,7 @@ export default function AdminOrders() {
     return statusFlow[currentStatus];
   };
 
-  if (!currentUser) {
+  if (!currentAdmin) {
     return (
       <>
         <Header />
@@ -223,7 +212,7 @@ export default function AdminOrders() {
                         <strong>Tên:</strong> {order.customer.fullName}
                       </div>
                       <div>
-                        <strong>Email:</strong> {order.customer.email}
+                        <strong>Email:</strong> {order.accountEmail || order.customer.email}
                       </div>
                       <div>
                         <strong>SĐT:</strong> {order.customer.phone}

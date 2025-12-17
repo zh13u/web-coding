@@ -5,6 +5,7 @@ import { Product } from "@/types";
 import { formatCurrency } from "@/utils";
 import WishlistButton from "./WishlistButton";
 
+//Productcard can nhan du lieu sp : id , name .. nhung khong dung brand category nen phai dung Omit
 interface ProductCardProps extends Omit<Product, 'brand' | 'category' | 'inStock'> {
   onAddToCart?: (productId: number) => void;
   className?: string;

@@ -1,60 +1,37 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useAdminGuard } from '@/hooks/useAdminGuard';
 import Alert from '@/components/Alert';
+import { products as DEFAULT_PRODUCTS } from "@/data/products";
+import { categories as DEFAULT_CATEGORIES } from "@/data/categories";
+import type { Category, Product } from "@/types";
 
 export default function AdminProducts() {
-  const [currentUser] = useLocalStorage<any>('currentUser', null);
-  const [products, setProducts] = useState<any[]>([]);
+  const { currentAdmin } = useAdminGuard();
+  const [products, setProducts] = useLocalStorage<Product[]>(
+    'products',
+    DEFAULT_PRODUCTS,
+  );
+  const [categories] = useLocalStorage<Category[]>(
+    'categories',
+    DEFAULT_CATEGORIES,
+  );
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBrand, setFilterBrand] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
+
+  const activeCategories = categories.filter((category) => category.isActive);
 
   // Mock data - trong thực tế sẽ fetch từ API
-  const mockProducts = [
-    {
-      id: 1,
-      name: 'iPhone 15 Pro',
-      price: 29990000,
-      oldPrice: 32990000,
-      image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      brand: 'Apple',
-      category: 'Smartphone',
-      inStock: true,
-      description: 'iPhone 15 Pro với chip A17 Pro mạnh mẽ nhất từ Apple'
-    },
-    {
-      id: 2,
-      name: 'Samsung Galaxy S24',
-      price: 19990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      brand: 'Samsung',
-      category: 'Smartphone',
-      inStock: true,
-      description: 'Samsung Galaxy S24 với AI tích hợp và camera chuyên nghiệp'
-    },
-    {
-      id: 3,
-      name: 'Xiaomi 14',
-      price: 15990000,
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      brand: 'Xiaomi',
-      category: 'Smartphone',
-      inStock: false,
-      description: 'Xiaomi 14 với Snapdragon 8 Gen 3 và camera Leica'
-    }
-  ];
-
-  useEffect(() => {
-    setProducts(mockProducts);
-  }, []);
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('vi-VN') + 'đ';
@@ -92,9 +69,10 @@ export default function AdminProducts() {
       showAlertMessage('Đã cập nhật sản phẩm thành công!');
     } else {
       // Add new product
+      const nextId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
       const newProduct = {
         ...productData,
-        id: Math.max(...products.map(p => p.id)) + 1
+        id: nextId
       };
       setProducts(prev => [...prev, newProduct]);
       showAlertMessage('Đã thêm sản phẩm mới thành công!');
@@ -107,10 +85,11 @@ export default function AdminProducts() {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.brand.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesBrand = filterBrand === 'all' || product.brand === filterBrand;
-    return matchesSearch && matchesBrand;
+    const matchesCategory = filterCategory === 'all' || product.category === filterCategory;
+    return matchesSearch && matchesBrand && matchesCategory;
   });
 
-  if (!currentUser) {
+  if (!currentAdmin) {
     return (
       <>
         <Header />
@@ -160,11 +139,28 @@ export default function AdminProducts() {
                 onChange={(e) => setFilterBrand(e.target.value)}
                 className="brand-filter"
               >
-                <option value="all">Tất cả thương hiệu</option>
-                <option value="Apple">Apple</option>
-                <option value="Samsung">Samsung</option>
-                <option value="Xiaomi">Xiaomi</option>
-                <option value="OPPO">OPPO</option>
+                <option value="all">Tat ca thuong hieu</option>
+                <option value="iphone">iPhone</option>
+                <option value="samsung">Samsung</option>
+                <option value="xiaomi">Xiaomi</option>
+                <option value="oppo">OPPO</option>
+                <option value="vivo">Vivo</option>
+                <option value="pixel">Pixel</option>
+                <option value="realme">Realme</option>
+                <option value="asus">ASUS</option>
+                <option value="nokia">Nokia</option>
+              </select>
+              <select
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="brand-filter"
+              >
+                <option value="all">Tat ca danh muc</option>
+                {activeCategories.map((category) => (
+                  <option key={category.id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
             </div>
             
@@ -249,6 +245,7 @@ export default function AdminProducts() {
       {showProductForm && (
         <ProductForm 
           product={editingProduct}
+          categories={activeCategories}
           onSave={handleSaveProduct}
           onCancel={() => {
             setShowProductForm(false);
@@ -263,14 +260,14 @@ export default function AdminProducts() {
 }
 
 // Product Form Component
-function ProductForm({ product, onSave, onCancel }: any) {
+function ProductForm({ product, categories, onSave, onCancel }: { product: Product | null; categories: Category[]; onSave: (data: any) => void; onCancel: () => void; }) {
   const [formData, setFormData] = useState({
     name: product?.name || '',
     price: product?.price || '',
     oldPrice: product?.oldPrice || '',
     image: product?.image || '',
-    brand: product?.brand || 'Apple',
-    category: product?.category || 'Smartphone',
+    brand: product?.brand || 'iphone',
+    category: product?.category || categories[0]?.name || 'Smartphone',
     inStock: product?.inStock ?? true,
     description: product?.description || ''
   });
@@ -386,12 +383,15 @@ function ProductForm({ product, onSave, onCancel }: any) {
                 onChange={handleInputChange}
                 required
               >
-                <option value="Apple">Apple</option>
-                <option value="Samsung">Samsung</option>
-                <option value="Xiaomi">Xiaomi</option>
-                <option value="OPPO">OPPO</option>
-                <option value="Vivo">Vivo</option>
-                <option value="OnePlus">OnePlus</option>
+                <option value="iphone">iPhone</option>
+                <option value="samsung">Samsung</option>
+                <option value="xiaomi">Xiaomi</option>
+                <option value="oppo">OPPO</option>
+                <option value="vivo">Vivo</option>
+                <option value="pixel">Pixel</option>
+                <option value="realme">Realme</option>
+                <option value="asus">ASUS</option>
+                <option value="nokia">Nokia</option>
               </select>
             </div>
             <div className="form-group">
@@ -403,9 +403,15 @@ function ProductForm({ product, onSave, onCancel }: any) {
                 onChange={handleInputChange}
                 required
               >
-                <option value="Smartphone">Smartphone</option>
-                <option value="Tablet">Tablet</option>
-                <option value="Accessories">Phụ kiện</option>
+                {categories.length === 0 ? (
+                  <option value="Smartphone">Smartphone</option>
+                ) : (
+                  categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))
+                )}
               </select>
             </div>
           </div>

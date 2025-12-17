@@ -12,7 +12,7 @@ import { formatCurrency } from '@/utils';
 export default function Checkout() {
   const router = useRouter();
   const [cartItems, setCartItems] = useLocalStorage<CartItem[]>('cart', []);
-  const [currentUser] = useLocalStorage<{ name: string; email: string } | null>('currentUser', null);
+  const [currentUser] = useLocalStorage<{ id?: number; name: string; email: string } | null>('currentUser', null);
 
   const [formData, setFormData] = useState({
     fullName: currentUser?.name || '',
@@ -35,6 +35,7 @@ export default function Checkout() {
   const [couponMessage, setCouponMessage] = useState('');
 
   useEffect(() => {
+    // Neu gio hang rong thi khong cho vao checkout
     if (cartItems.length === 0) {
       router.push('/cart');
     }
@@ -45,6 +46,7 @@ export default function Checkout() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Kiem tra cac truong bat buoc truoc khi tao don
   const validateForm = (): boolean => {
     const newErrors: string[] = [];
     if (!formData.fullName.trim()) newErrors.push('Họ tên là bắt buộc');
@@ -59,6 +61,7 @@ export default function Checkout() {
     return newErrors.length === 0;
   };
 
+  // Gia lap API: luu don vao localStorage, sinh orderNumber, clear cart
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -74,7 +77,9 @@ export default function Checkout() {
       total: calculateTotal(),
       discount: discountAmount,
       status: 'pending',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      accountEmail: currentUser?.email ?? null,
+      accountId: currentUser?.id ?? null
     };
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
     orders.push(order);
@@ -95,6 +100,7 @@ export default function Checkout() {
     return subtotal + shipping - discount;
   };
 
+  // Ma giam gia don gian: PHONE10 (10%), SALE50K (giam toi da 50k)
   const applyCoupon = () => {
     const code = couponCode.trim().toUpperCase();
     const subtotal = calculateSubtotal();

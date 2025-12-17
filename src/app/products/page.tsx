@@ -1,15 +1,16 @@
 'use client';
 
-import { SyntheticEvent, useEffect, useState } from "react";
+import { SyntheticEvent, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formatCurrency } from "@/utils";
-import { products as PRODUCTS_DATA, Product } from "@/data/products";
-
-const PRODUCTS: Product[] = PRODUCTS_DATA;
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { products as DEFAULT_PRODUCTS } from "@/data/products";
+import { categories as DEFAULT_CATEGORIES } from "@/data/categories";
+import type { Category, Product } from "@/types";
 
 const FALLBACK_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 240' role='img' aria-label='Placeholder'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230ea5e9'/%3E%3Cstop offset='100%25' stop-color='%236366f1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='320' height='240' rx='18' fill='url(%23g)'/%3E%3Crect x='98' y='24' width='124' height='192' rx='16' fill='%23111' stroke='%23222' stroke-width='3'/%3E%3Crect x='112' y='52' width='96' height='136' rx='12' fill='%23182'/%3E%3Ccircle cx='160' cy='38' r='4' fill='%23cbd5e1'/%3E%3Crect x='136' y='40' width='48' height='5' rx='2.5' fill='%23cbd5e1'/%3E%3Ccircle cx='160' cy='206' r='5' fill='%23cbd5e1'/%3E%3Ctext x='160' y='192' fill='%23e2e8f0' font-family='Arial, sans-serif' font-size='14' text-anchor='middle'%3EPhoneStore%3C/text%3E%3C/svg%3E";
@@ -18,29 +19,45 @@ export default function ProductsPage() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get("q") ?? "";
   const initialBrand = searchParams.get("brand") ?? "";
+  const initialCategory = searchParams.get("category") ?? "";
 
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(PRODUCTS);
+  const [products] = useLocalStorage<Product[]>("products", DEFAULT_PRODUCTS);
+  const [categories] = useLocalStorage<Category[]>("categories", DEFAULT_CATEGORIES);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [brandFilter, setBrandFilter] = useState(initialBrand);
+  const [categoryFilter, setCategoryFilter] = useState(initialCategory);
   const [priceFilter, setPriceFilter] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "price-low" | "price-high" | "newest">(
     "name",
   );
 
+  const activeCategories = useMemo(
+    () => categories.filter((category) => category.isActive),
+    [categories],
+  );
+
   useEffect(() => {
     const fromUrl = searchParams.get("q") ?? "";
     const brandFromUrl = searchParams.get("brand") ?? "";
+    const categoryFromUrl = searchParams.get("category") ?? "";
     setSearchTerm(fromUrl);
     setBrandFilter(brandFromUrl);
+    setCategoryFilter(categoryFromUrl);
   }, [searchParams]);
 
   useEffect(() => {
-    let result = [...PRODUCTS];
+    // Filter pipeline: start from all products, apply search/brand/price filters, then sort
+    let result = [...products];
 
     // Lọc theo tên sản phẩm
     if (searchTerm.trim()) {
       const keyword = searchTerm.toLowerCase();
-      result = result.filter((p) => p.name.toLowerCase().includes(keyword));
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(keyword) ||
+          p.description.toLowerCase().includes(keyword),
+      );
     }
 
     // Lọc theo hãng
@@ -49,6 +66,10 @@ export default function ProductsPage() {
     }
 
     // Lọc theo khoảng giá
+    if (categoryFilter) {
+      result = result.filter((p) => p.category === categoryFilter);
+    }
+
     if (priceFilter) {
       const [min, max] = priceFilter.split("-").map(Number);
       result = result.filter((p) => p.price >= min && p.price <= max);
@@ -71,16 +92,22 @@ export default function ProductsPage() {
     });
 
     setFilteredProducts(result);
-  }, [searchTerm, brandFilter, priceFilter, sortBy]);
+  }, [products, searchTerm, brandFilter, categoryFilter, priceFilter, sortBy]);
 
   const clearFilters = () => {
     setSearchTerm("");
     setBrandFilter("");
+    setCategoryFilter("");
     setPriceFilter("");
     setSortBy("name");
   };
 
   const handleAddToCart = (product: Product) => {
+    if (product.inStock === false) {
+      alert("San pham dang het hang.");
+      return;
+    }
+    // Demo add-to-cart: ghi truc tiep vao localStorage (khong goi API)
     const raw = localStorage.getItem("cart");
     const cart: any[] = raw ? JSON.parse(raw) : [];
 
@@ -186,6 +213,22 @@ export default function ProductsPage() {
                 <option value="price-low">Giá thấp đến cao</option>
                 <option value="price-high">Giá cao đến thấp</option>
                 <option value="newest">Mới nhất</option>
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="category-filter">Danh muc:</label>
+              <select
+                id="category-filter"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+              >
+                <option value="">Tat ca</option>
+                {activeCategories.map((category) => (
+                  <option key={category.id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
             </div>
 

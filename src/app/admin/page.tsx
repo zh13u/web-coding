@@ -4,17 +4,21 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useState, useEffect } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useAdminGuard } from '@/hooks/useAdminGuard';
 import { formatCurrency } from '@/utils';
+import { products as DEFAULT_PRODUCTS } from "@/data/products";
+import type { Product } from "@/types";
 
 export default function AdminDashboard() {
-  const [currentUser] = useLocalStorage<any>('currentUser', null);
+  const { currentAdmin, logout } = useAdminGuard();
   const [reviewsData] = useLocalStorage<any[]>('reviews', []);
   const [usersData] = useLocalStorage<any[]>('users', []);
   const [ordersData] = useLocalStorage<any[]>('orders', []);
+  const [productsData] = useLocalStorage<Product[]>('products', DEFAULT_PRODUCTS);
 
   const [stats, setStats] = useState({
     totalUsers: 0,
-    totalProducts: 8, // Mock data
+    totalProducts: 0,
     totalOrders: 0,
     totalRevenue: 0,
     averageRating: 0,
@@ -30,6 +34,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const totalUsers = usersData.length;
     const totalReviews = reviewsData.length;
+    const totalProducts = productsData.length;
     const averageRating =
       reviewsData.length > 0
         ? reviewsData.reduce((sum, review) => sum + review.rating, 0) / reviewsData.length
@@ -78,7 +83,7 @@ export default function AdminDashboard() {
 
     setStats({
       totalUsers,
-      totalProducts: 8,
+      totalProducts,
       totalOrders,
       totalRevenue,
       averageRating,
@@ -90,7 +95,7 @@ export default function AdminDashboard() {
       thisWeek: weekRevenue,
       thisMonth: monthRevenue,
     });
-  }, [usersData, reviewsData, ordersData]);
+  }, [usersData, reviewsData, ordersData, productsData]);
 
   const recentUsers = usersData.slice(-5).reverse();
   const recentReviews = reviewsData.slice(-5).reverse();
@@ -106,19 +111,8 @@ export default function AdminDashboard() {
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
-  if (!currentUser) {
-    return (
-      <>
-        <Header activePage="admin" />
-        <section className="page-header">
-          <div className="container">
-            <h1>Admin Dashboard</h1>
-            <p>Bạn cần đăng nhập để truy cập trang này</p>
-          </div>
-        </section>
-        <Footer />
-      </>
-    );
+  if (!currentAdmin) {
+    return null;
   }
 
   return (
@@ -128,7 +122,10 @@ export default function AdminDashboard() {
       <section className="page-header">
         <div className="container">
           <h1>Admin Dashboard</h1>
-          <p>Chào mừng {currentUser.name}! Quản lý cửa hàng PhoneStore</p>
+          <p>Chào mừng {currentAdmin.name}! Quản lý cửa hàng PhoneStore</p>
+          <button className="btn btn-outline" onClick={logout} style={{ marginTop: '0.75rem' }}>
+            Dang xuat admin
+          </button>
         </div>
       </section>
 

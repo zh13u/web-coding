@@ -26,6 +26,7 @@ export default function Header({ activePage = '' }: HeaderProps) {
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
+  // Doc thong tin user tu localStorage de giu trang thai dang nhap gia lap
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
@@ -41,6 +42,7 @@ export default function Header({ activePage = '' }: HeaderProps) {
     }
   }, []);
 
+  // Cap nhat badge gio hang / wishlist moi khi storage thay doi
   useEffect(() => {
     const updateCounts = () => {
       try {
@@ -82,6 +84,7 @@ export default function Header({ activePage = '' }: HeaderProps) {
     router.push('/');
   };
 
+  // Day query len URL /products?q=... de filter san pham
   const handleSearch = (query: string) => {
     const trimmed = query.trim();
     if (!trimmed) {

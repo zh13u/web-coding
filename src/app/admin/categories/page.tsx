@@ -1,14 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useAdminGuard } from '@/hooks/useAdminGuard';
 import Alert from '@/components/Alert';
+import { categories as DEFAULT_CATEGORIES } from "@/data/categories";
+import { products as DEFAULT_PRODUCTS } from "@/data/products";
+import type { Category, Product } from "@/types";
 
 export default function AdminCategories() {
-  const [currentUser] = useLocalStorage<any>('currentUser', null);
-  const [categories, setCategories] = useState<any[]>([]);
+  const { currentAdmin } = useAdminGuard();
+  const [categories, setCategories] = useLocalStorage<Category[]>(
+    'categories',
+    DEFAULT_CATEGORIES,
+  );
+  const [products] = useLocalStorage<Product[]>(
+    'products',
+    DEFAULT_PRODUCTS,
+  );
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [showAlert, setShowAlert] = useState(false);
@@ -16,39 +27,6 @@ export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Mock data - trong thực tế sẽ fetch từ API
-  const mockCategories = [
-    {
-      id: 1,
-      name: 'Smartphone',
-      description: 'Điện thoại thông minh',
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      productCount: 25,
-      isActive: true,
-      createdAt: '2024-01-15'
-    },
-    {
-      id: 2,
-      name: 'Tablet',
-      description: 'Máy tính bảng',
-      image: 'https://images.unsplash.com/photo-1561154464-82e9adf32764?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      productCount: 8,
-      isActive: true,
-      createdAt: '2024-01-15'
-    },
-    {
-      id: 3,
-      name: 'Phụ kiện',
-      description: 'Phụ kiện điện thoại và tablet',
-      image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-      productCount: 45,
-      isActive: true,
-      createdAt: '2024-01-15'
-    }
-  ];
-
-  useEffect(() => {
-    setCategories(mockCategories);
-  }, []);
 
   const showAlertMessage = (message: string) => {
     setAlertMessage(message);
@@ -95,12 +73,17 @@ export default function AdminCategories() {
     setEditingCategory(null);
   };
 
-  const filteredCategories = categories.filter(category => 
+  const categoriesWithCount = categories.map((category) => ({
+    ...category,
+    productCount: products.filter((product) => product.category === category.name).length,
+  }));
+
+  const filteredCategories = categoriesWithCount.filter(category => 
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (!currentUser) {
+  if (!currentAdmin) {
     return (
       <>
         <Header />
@@ -358,4 +341,3 @@ function CategoryForm({ category, onSave, onCancel }: any) {
     </div>
   );
 }
-

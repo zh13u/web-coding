@@ -15,6 +15,16 @@ export interface Product {
 }
 
 // Kiểu dữ liệu cho giỏ hàng
+// Ki ¯Ÿu d ¯_ li ¯Øu cho danh m ¯c s §œn ph §cm
+export interface Category {
+  id: number;
+  name: string;
+  description: string;
+  image: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface CartItem {
   id: number;
   name: string;
@@ -80,6 +90,7 @@ export interface AdminAccount {
   isActive: boolean;
   createdAt: string;
   lastLogin: string | null;
+  password?: string;
 }
 
 export interface CustomerSummary {
@@ -143,4 +154,3 @@ export type AlertType = 'success' | 'error' | 'warning' | 'info';
 // Kiểu dữ liệu cho badge
 export type BadgeType = 'default' | 'success' | 'warning' | 'error' | 'info';
 export type BadgeSize = 'small' | 'medium' | 'large';
-

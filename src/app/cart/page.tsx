@@ -19,6 +19,7 @@ interface CartItemData {
 export default function CartPage() {
   const [cartItems, setCartItems] = useLocalStorage<CartItemData[]>("cart", []);
 
+  // Cap nhat so luong tung item, gio hang luu trong localStorage
   const updateQuantity = (id: number, newQuantity: number) => {
     if (newQuantity < 1 || newQuantity > 10) return;
     setCartItems((items) =>
@@ -39,6 +40,7 @@ export default function CartPage() {
     }
   };
 
+  // Validate gio hang truoc khi di toi trang thanh toan
   const handleCheckout = () => {
     if (cartItems.length === 0) {
       alert("Giỏ hàng đang trống, hãy thêm sản phẩm trước.");
@@ -146,4 +148,3 @@ export default function CartPage() {
     </>
   );
 }
-
